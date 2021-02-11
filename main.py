@@ -2,9 +2,10 @@ import turtle as trtl
 import random
 wn = trtl.Screen()
 #---------Setup---------
+wn.addshape("Main_Character.gif")
 player = trtl.Turtle()
 player.pu()
-player.shape("turtle")
+player.shape("Main_Character.gif")
 
 vertical = 1000
 horizontal = 1800
@@ -37,25 +38,42 @@ def draw_gridy():
         drawer.goto(horizontal,1080)
     wn.tracer(True)
 
+def bound():
+    x = player.xcor()
+    y = player.ycor()
+    if x > 880:
+        player.goto((x-80)*-1,y)
+    if x < -880:
+        player.goto((x+80)*-1,y)
+    if y > 480:
+        player.goto(x,(y-80)*-1)
+    if y < -480:
+        player.goto(x,(y+80)*-1)
+    
+
 def up():
     wn.tracer(False)
     player.setheading(90)
     player.forward(80)
+    bound()
     wn.tracer(True)
 def down():
     wn.tracer(False)
     player.setheading(270)
     player.forward(80)
+    bound()
     wn.tracer(True)
 def left():
     wn.tracer(False)
     player.setheading(180)
     player.forward(80)
+    bound()
     wn.tracer(True)
 def right():
     wn.tracer(False)
     player.setheading(0)
     player.forward(80)
+    bound()
     wn.tracer(True)
 
 #---------Main---------
