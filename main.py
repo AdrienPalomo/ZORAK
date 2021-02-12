@@ -2,10 +2,19 @@ import turtle as trtl
 import random
 wn = trtl.Screen()
 #---------Setup---------
+wn.tracer(False)
+
 wn.addshape("Main_Character.gif")
+wn.addshape("Enemy.gif")
+
 player = trtl.Turtle()
 player.pu()
 player.shape("Main_Character.gif")
+
+enemy = trtl.Turtle()
+enemy.pu()
+enemy.shape("Enemy.gif")
+enemy.goto(240,0)
 
 vertical = 1000
 horizontal = 1800
@@ -15,6 +24,7 @@ drawer.speed(0)
 drawer.goto(1920,vertical)
 drawer.pendown()
 
+wn.tracer(True)
 #---------Functions---------
 def draw_gridx():
     global vertical
