@@ -1,6 +1,8 @@
 import turtle as trtl
 import random
+import sys
 wn = trtl.Screen()
+wn.bgpic("background.gif")
 #---------Setup---------
 wn.tracer(False)
 
@@ -19,6 +21,7 @@ enemy.goto(240,0)
 vertical = 1000
 horizontal = 1800
 drawer = trtl.Turtle()
+drawer.color("white")
 drawer.pu()
 drawer.speed(0)
 drawer.goto(1920,vertical)
@@ -48,6 +51,52 @@ def draw_gridy():
         drawer.goto(horizontal,1080)
     wn.tracer(True)
 
+def enemy_move():
+    xe = enemy.xcor()
+    ye = enemy.ycor()
+    x = player.xcor()
+    y = player.ycor()
+    if xe - x > 0:
+        if ye - y < 0:
+            if (xe - x) > (ye - y) * -1:
+                enemy.goto(xe-80,ye)
+            elif (xe - x) < (ye - y) * -1:
+                enemy.goto(xe,ye+80)
+            elif (xe - x) == (ye - y) * -1:
+                enemy.goto(xe - 80, ye)
+        elif ye - y > 0:
+            if (xe - x) > (ye - y):
+                enemy.goto(xe-80,ye)
+            elif (xe - x) < (ye - y):
+                enemy.goto(xe, ye - 80)
+            elif (xe - x) == (ye - y):
+                enemy.goto(xe - 80, ye)
+        elif ye - y == 0:
+            enemy.goto(xe - 80, ye)  
+    elif xe - x < 0:
+        if ye - y < 0:
+            if (xe - x) * -1 > (ye - y) * -1:
+                enemy.goto(xe + 80,ye)
+            elif (xe - x) * -1 < (ye - y) * -1:
+                enemy.goto(xe,ye+80)
+            elif (xe - x) == (ye - y):
+                enemy.goto(xe + 80, ye)
+        elif ye - y > 0:
+            if (xe - x) * -1 > (ye - y):
+                enemy.goto(xe + 80,ye)
+            elif (xe - x) * -1 < (ye - y):
+                enemy.goto(xe,ye-80)
+            elif (xe - x) * -1 == (ye - y):
+                enemy.goto(xe + 80, ye)
+        elif ye - y == 0:
+            enemy.goto(xe + 80, ye)
+    elif xe == x:
+        if ye - y < 0:
+            enemy.goto(xe, ye + 80)
+        elif ye - y > 0:
+            enemy.goto(xe, ye - 80)
+
+
 def player_bound():
     x = player.xcor()
     y = player.ycor()
@@ -66,24 +115,28 @@ def up():
     player.setheading(90)
     player.forward(80)
     player_bound()
+    enemy_move()
     wn.tracer(True)
 def down():
     wn.tracer(False)
     player.setheading(270)
     player.forward(80)
     player_bound()
+    enemy_move()
     wn.tracer(True)
 def left():
     wn.tracer(False)
     player.setheading(180)
     player.forward(80)
     player_bound()
+    enemy_move()
     wn.tracer(True)
 def right():
     wn.tracer(False)
     player.setheading(0)
     player.forward(80)
     player_bound()
+    enemy_move()
     wn.tracer(True)
 
 #---------Main---------
