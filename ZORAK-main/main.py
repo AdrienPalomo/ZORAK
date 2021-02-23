@@ -70,11 +70,21 @@ def all_enemy(function):
         function(enemy_list[i])
 
 def all_enemy_damage(direction):
+    if direction == 1:
+            ball_animation(90)
+        elif direction == 2:
+            ball_animation(270)
+        elif direction == 3:
+            ball_animation(180)
+        elif direction == 4:
+            ball_animation(0)
+            
     for i in range(enemy_count):
         player_attack(direction, enemy_list[i])
     all_enemy(enemy_move)
     time.sleep(.05)
     all_enemy(enemy_attack)
+    attack_status = 0
 
 def make_enemy():
     global enemy_count, enemy_list
@@ -189,15 +199,6 @@ def player_attack(direction,enemy):
         y = player.ycor()
         xf = xe - x
         yf = ye - y
-
-        if direction == 1:
-            ball_animation(90)
-        elif direction == 2:
-            ball_animation(270)
-        elif direction == 3:
-            ball_animation(180)
-        elif direction == 4:
-            ball_animation(0)
         #UP
         if (direction == 1) and (xf <= 40) and (xf >= -40) and (yf >= 0) and (yf <= ball_distance + 40):
             wn.tracer(False)
@@ -221,7 +222,6 @@ def player_attack(direction,enemy):
             wn.tracer(False)
             enemy.goto(10**99,10**99)
             wn.tracer(True)
-    attack_status = 0
     player.shape("Main_Character.gif")
 
 #GETS THE CHARACTER READY TO ATTACK
