@@ -10,6 +10,7 @@ wn.tracer(False)
 wn.addshape("Main_Character.gif")
 wn.addshape("Enemy.gif")
 wn.addshape("Ball.gif")
+wn.addshape("Main_Character_Attack.gif")
 
 player = trtl.Turtle()
 player.pu()
@@ -21,10 +22,10 @@ ball.shape("Ball.gif")
 ball.hideturtle()
 ball.speed(4)
 
-enemy = trtl.Turtle()
-enemy.pu()
-enemy.shape("Enemy.gif")
-enemy.goto(240,0)
+#enemy = trtl.Turtle()
+#enemy.pu()
+#enemy.shape("Enemy.gif")
+#enemy.goto(240,0)
 
 player_health = 3
 player_hp = trtl.Turtle()
@@ -51,8 +52,41 @@ drawer.color("white")
 drawer.pu()
 drawer.speed(0)
 
+pointer = trtl.Turtle()
+pointer.pu()
+pointer.hideturtle()
+pointer.goto(-370,335)
+pointer.speed(0)
+pointer.turtlesize(2)
+
+pointer_possition = 1
+
+enemy_count = 0
+enemy_list = []
 wn.tracer(True)
 #---------Functions---------
+def all_enemy(function):
+    for i in range(enemy_count):
+        function(enemy_list[i])
+
+def all_enemy_damage(direction):
+    for i in range(enemy_count):
+        player_attack(direction, enemy_list[i])
+    all_enemy(enemy_move)
+    time.sleep(.05)
+    all_enemy(enemy_attack)
+
+def make_enemy():
+    global enemy_count, enemy_list
+    enemy_list.append(str(enemy_count))
+    enemy_list[enemy_count] = trtl.Turtle()
+    enemy_list[enemy_count].shape("Enemy.gif")
+    enemy_list[enemy_count].pu()
+    x = random.randint(-11,11)
+    y = random.randint(-6,6)
+    enemy_list[enemy_count].goto(x*80, y*80)
+    enemy_count = enemy_count + 1
+
 #SENDS BALL FORWARD
 def ball_animation(heading):
     global attack_status, ball_distance
@@ -79,7 +113,7 @@ def hurt_animation(sprite):
     attack_status = 0
 
 #MAKES ENEMY ATTACK IF THEY ARE WITHIN A CERTAIN DISTANCE
-def enemy_attack():
+def enemy_attack(enemy):
     global player_health, wait
     xe = enemy.xcor()
     ye = enemy.ycor()
@@ -94,7 +128,7 @@ def enemy_attack():
         display_health()
 
 #ALL ENEMY MOVEMENT THIS WAS PAIN
-def enemy_move():
+def enemy_move(enemy):
     global wait
     wn.tracer(False)
     xe = enemy.xcor()
@@ -146,7 +180,7 @@ def enemy_move():
     wn.tracer(True)
 
 #MAKES THE PLAYER ATTACK, CHECKS TO SEE IF IT HITS, THEN MAKES MULTIPLE ANIMATIONS
-def player_attack(direction):
+def player_attack(direction,enemy):
     global attack_status, ball_distance
     if attack_status == 1:
         xe = enemy.xcor()
@@ -189,16 +223,13 @@ def player_attack(direction):
             wn.tracer(True)
     attack_status = 0
     player.shape("Main_Character.gif")
-    enemy_move()
-    time.sleep(.05)
-    enemy_attack()
 
 #GETS THE CHARACTER READY TO ATTACK
 def set_attack():
     global attack_status, menu_status
     if attack_status == 0 and menu_status == 0:
         attack_status = 1
-        player.shape("Enemy.gif")
+        player.shape("Main_Character_Attack.gif")
     elif attack_status == 1 and menu_status == 0:
         attack_status = 0
         player.shape("Main_Character.gif")
@@ -207,25 +238,25 @@ def set_attack():
 def set_up():
     global attack_status, menu_status
     if attack_status == 1 and menu_status == 0:
-        player_attack(1)
+        all_enemy_damage(1)
 
 #SETS THE ENEMY ATTACK DIRECTION TO DOWN
 def set_down():
     global attack_status, menu_status
     if attack_status == 1 and menu_status == 0:
-        player_attack(2)
+        all_enemy_damage(2)
 
 #SETS THE ENEMY ATTACK DIRECTION TO THE LEFT
 def set_left():
     global attack_status, menu_status
     if attack_status == 1 and menu_status == 0:
-        player_attack(3)
+        all_enemy_damage(3)
 
 #SETS THE ENEMY ATTACK DIRECTION TO THE RIGHT
 def set_right():
     global attack_status, menu_status
     if attack_status == 1 and menu_status == 0:
-        player_attack(4)
+        all_enemy_damage(4)
 
 #MAKES DRAWER DISPLAY HERO HEALTH, AND PAUSES FOR 1 SECOND BEFORE ENDING THE GAME IF HEALTH REACHES 0
 def display_health():
@@ -266,12 +297,14 @@ def player_bound():
     y = player.ycor()
     if x > 880:
         player.goto((x-80)*-1,y)
-    if x < -880:
+    elif x < -880:
         player.goto((x+80)*-1,y)
-    if y > 480:
+    elif y > 480:
         player.goto(x,(y-80)*-1)
-    if y < -480:
+    elif y < -480:
         player.goto(x,(y+80)*-1)
+    elif y <= -120 and y >= -200 and x <= 520 and x >= 440:
+        player.goto(800,0)
     
 #MOVES CHARACTER UP, THEN DOES ENEMY MOVEMENT
 def up():
@@ -282,9 +315,9 @@ def up():
         player.forward(80)
         player_bound()
         wn.tracer(True)
-        enemy_move()
+        all_enemy(enemy_move)
         time.sleep(.05)
-        enemy_attack()
+        all_enemy(enemy_attack)
 #MOVES CHARACTER DOWN, THEN DOES ENEMY MOVEMENT
 def down():
     global attack_status, menu_status
@@ -294,9 +327,9 @@ def down():
         player.forward(80)
         player_bound()
         wn.tracer(True)
-        enemy_move()
+        all_enemy(enemy_move)
         time.sleep(.05)
-        enemy_attack()
+        all_enemy(enemy_attack)
 #MOVES CHARACTER LEFT, THEN DOES ENEMY MOVEMENT
 def left():
     global attack_status, menu_status
@@ -306,9 +339,9 @@ def left():
         player.forward(80)
         player_bound()
         wn.tracer(True)
-        enemy_move()
+        all_enemy(enemy_move)
         time.sleep(.05)
-        enemy_attack()
+        all_enemy(enemy_attack)
 #MOVES CHARACTER RIGHT, THEN DOES ENEMY MOVEMENT
 def right():
     global attack_status, menu_status
@@ -318,14 +351,15 @@ def right():
         player.forward(80)
         player_bound()
         wn.tracer(True)
-        enemy_move()
+        all_enemy(enemy_move)
         time.sleep(.05)
-        enemy_attack()
+        all_enemy(enemy_attack)
 
 #MAKES MENU/SHOP
 def make_menu():
     global menu_status
     if menu_status == 0:
+        wn.tracer(False)
         drawer.clear()
         drawer.pu()
         drawer.goto(-400,400)
@@ -344,17 +378,18 @@ def make_menu():
         drawer.pensize(1)
         drawer.pu()
         drawer.goto(-350,300)
-        drawer.write("IM ONWY ONE: 20 GOLD", font=("Impact", 40, "bold"))
+        drawer.write("RANGE UP: 40 GOLD", font=("Impact", 40, "bold"))
         drawer.goto(-350,0)
-        drawer.write("IM ONWY TWO: 20 GOLD", font=("Impact", 40, "bold"))
+        drawer.write("SPREAD SHOT: 100 GOLD", font=("Impact", 40, "bold"))
         drawer.goto(-350,-300)
-        drawer.write("IM ONWY TWEE: 20 GOLD", font=("Impact", 40, "bold"))
+        drawer.write("EXPERT MODE", font=("Impact", 40, "bold"))
         drawer.color("white")
+        pointer.showturtle()
+        wn.tracer(True)
         menu_status = 1
     elif menu_status == 1:
+        wn.tracer(False)
         drawer.clear()
-        vertical = 1000
-        horizontal = 1800
         drawer.pu()
         drawer.goto(1920,1000)
         drawer.pendown()
@@ -364,8 +399,24 @@ def make_menu():
         drawer.pendown()
         draw_gridy()
         display_health()
+        pointer.hideturtle()
+        wn.tracer(True)
         menu_status = 0
         
+def pointer_up():
+    global pointer_possition, menu_status
+    x = pointer.xcor()
+    y = pointer.ycor()
+    if pointer_possition > 1 and menu_status == 1:
+        pointer.goto(x,y + 300)
+        pointer_possition = pointer_possition - 1
+def pointer_down():
+    global pointer_possition, menu_status
+    x = pointer.xcor()
+    y = pointer.ycor()
+    if pointer_possition < 3 and menu_status == 1:
+        pointer.goto(x,y - 300)
+        pointer_possition = pointer_possition + 1
 
 #---------Main---------
 menu_status = 0
@@ -377,6 +428,9 @@ drawer.goto(1800, 1080)
 drawer.pendown()
 draw_gridy()
 display_health()
+make_enemy()
+make_enemy()
+
 
 wn.onkey(up,'w')
 wn.onkey(down,'s')
@@ -390,7 +444,10 @@ wn.onkeypress(set_right,'l')
 
 wn.onkeypress(set_attack, 'z')
 
-wn.onkeypress(make_menu, 'm')
+wn.onkey(make_menu, 'm')
+
+wn.onkey(pointer_up, "Up")
+wn.onkey(pointer_down, "Down")
 
 wn.listen()
 wn.mainloop()
