@@ -89,6 +89,9 @@ explosion.shape("explosion1.gif")
 explosion.hideturtle()
 
 price = 20
+
+spread = False
+animation = False
 wn.tracer(True)
 #---------Functions---------
 #MAKES AN EXPLOSION AT THE SPECIFIED COORDINATE
@@ -107,13 +110,17 @@ def explosion_animation(xe, ye):
 #MAKES ALL ENEMIES DO A BASIC FUNCTION
 def all_enemy(function):
     for i in range(enemy_count):
-        function(enemy_list[i])
+        ye = enemy_list[i].ycor()
+        if ye < 10000:
+            function(enemy_list[i])
 
 #MAKES ALL ENEMIES ATTACK
 def all_enemy_attack(function):
     global wait
     for i in range(enemy_count):
-        function(enemy_list[i])
+        ye = enemy_list[i].ycor()
+        if ye < 10000:
+            function(enemy_list[i])
     if wait > 0:
         wait = wait - 1
 
@@ -130,7 +137,9 @@ def all_enemy_damage(direction):
         ball_animation(0)
     attack_status = 1
     for i in range(enemy_count):
-        player_attack(direction, i)
+        ye = enemy_list[i].ycor()
+        if ye < 10000:
+            player_attack(direction, i)
     a = random.randint(0,50)
     if a == 1:
         kill_everything()
@@ -148,15 +157,17 @@ def all_enemy_damage(direction):
 
 #OGY MAKES A GUEST APPEARANCE AND KILLS EVERYTHING ON THE SCREEN
 def kill_everything():
-    global ook
+    global ook, attack_status
     if ook != 1:
+        hold = attack_status
+        attack_status = 1
         ook = 1
         ogy.showturtle()
         time.sleep(.5)
         for i in range(enemy_count):
             xe = enemy_list[i].xcor()
             ye = enemy_list[i].ycor()
-            if ye < 1000:
+            if ye < 10000:
                 explosion_animation(xe, ye)
             make_coin(i, xe, ye)
             wn.tracer(False)
@@ -164,6 +175,7 @@ def kill_everything():
         ogy.hideturtle()
         wn.tracer(True)
         ook = 0
+        attack_status = hold
 
 #CHECKS TO SEE IF THE PLAYER IS STEPPING ON A COIN, THEN PICKS IT UP
 def check_coin():
@@ -175,7 +187,7 @@ def check_coin():
         y = player.ycor()
         if x - xc >= -40 and x - xc <= 40 and y - yc >= -40 and y - yc <= 40:
             wn.tracer(False)
-            a = random.randint(1,1000)
+            a = random.randint(1,30)
             coins = coins + a
             display_coins()
             coin_list[i].goto(10**99,10**99)
@@ -230,6 +242,64 @@ def ball_animation(heading):
     ball.showturtle()
     ball.forward(ball_distance + 40)
     ball.hideturtle()
+    if spread == True:
+        #UP
+        if heading == 90:
+            wn.tracer(False)
+            ball.goto(x-80,y)
+            wn.tracer(True)
+            ball.showturtle()
+            ball.forward(ball_distance + 40)
+            ball.hideturtle()
+            wn.tracer(False)
+            ball.goto(x+80,y)
+            wn.tracer(True)
+            ball.showturtle()
+            ball.forward(ball_distance + 40)
+            ball.hideturtle()
+        #LEFT
+        elif heading == 180:
+            wn.tracer(False)
+            ball.goto(x,y-80)
+            wn.tracer(True)
+            ball.showturtle()
+            ball.forward(ball_distance + 40)
+            ball.hideturtle()
+            wn.tracer(False)
+            ball.goto(x,y+80)
+            wn.tracer(True)
+            ball.showturtle()
+            ball.forward(ball_distance + 40)
+            ball.hideturtle()
+        #DOWN
+        elif heading == 270:
+            wn.tracer(False)
+            ball.goto(x-80,y)
+            wn.tracer(True)
+            ball.showturtle()
+            ball.forward(ball_distance + 40)
+            ball.hideturtle()
+            wn.tracer(False)
+            ball.goto(x+80,y)
+            wn.tracer(True)
+            ball.showturtle()
+            ball.forward(ball_distance + 40)
+            ball.hideturtle()
+        #RIGHT
+        elif heading == 0:
+            wn.tracer(False)
+            ball.goto(x,y-80)
+            wn.tracer(True)
+            ball.showturtle()
+            ball.forward(ball_distance + 40)
+            ball.hideturtle()
+            wn.tracer(False)
+            ball.goto(x,y+80)
+            wn.tracer(True)
+            ball.showturtle()
+            ball.forward(ball_distance + 40)
+            ball.hideturtle()
+
     attack_status = hold
 
 #FLASHES PLAYER/ENEMY FOR A HURT ANIMATION
@@ -319,34 +389,64 @@ def player_attack(direction,enemy):
         y = player.ycor()
         xf = xe - x
         yf = ye - y
-        #UP
-        if (direction == 1) and (xf <= 40) and (xf >= -40) and (yf >= 0) and (yf <= ball_distance + 40):
-            hurt_animation(enemy_list[enemy])
-            wn.tracer(False)
-            enemy_list[enemy].goto(10**99,10**99)
-            make_coin(enemy, xe, ye)
-            wn.tracer(True)
-        #DOWN
-        elif (direction == 2) and (xf <= 40) and (xf >= -40) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
-            hurt_animation(enemy_list[enemy])
-            wn.tracer(False)
-            enemy_list[enemy].goto(10**99,10**99)
-            make_coin(enemy, xe, ye)
-            wn.tracer(True)
-        #LEFT
-        elif direction == 3 and (yf <= 40) and (yf >= -40) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
-            hurt_animation(enemy_list[enemy])
-            wn.tracer(False)
-            enemy_list[enemy].goto(10**99,10**99)
-            make_coin(enemy, xe, ye)
-            wn.tracer(True)
-        #RIGHT
-        elif direction == 4 and (yf <= 40) and (yf >= -40) and (xf >= 0) and (xf <= ball_distance + 40):
-            hurt_animation(enemy_list[enemy])
-            wn.tracer(False)
-            enemy_list[enemy].goto(10**99,10**99)
-            make_coin(enemy, xe, ye)
-            wn.tracer(True)
+        if spread == False:
+            #UP
+            if (direction == 1) and (xf <= 40) and (xf >= -40) and (yf >= 0) and (yf <= ball_distance + 40):
+                hurt_animation(enemy_list[enemy])
+                wn.tracer(False)
+                enemy_list[enemy].goto(10**99,10**99)
+                make_coin(enemy, xe, ye)
+                wn.tracer(True)
+            #DOWN
+            elif (direction == 2) and (xf <= 40) and (xf >= -40) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
+                hurt_animation(enemy_list[enemy])
+                wn.tracer(False)
+                enemy_list[enemy].goto(10**99,10**99)
+                make_coin(enemy, xe, ye)
+                wn.tracer(True)
+            #LEFT
+            elif direction == 3 and (yf <= 40) and (yf >= -40) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
+                hurt_animation(enemy_list[enemy])
+                wn.tracer(False)
+                enemy_list[enemy].goto(10**99,10**99)
+                make_coin(enemy, xe, ye)
+                wn.tracer(True)
+            #RIGHT
+            elif direction == 4 and (yf <= 40) and (yf >= -40) and (xf >= 0) and (xf <= ball_distance + 40):
+                hurt_animation(enemy_list[enemy])
+                wn.tracer(False)
+                enemy_list[enemy].goto(10**99,10**99)
+                make_coin(enemy, xe, ye)
+                wn.tracer(True)
+        elif spread == True:
+            #UP
+            if (direction == 1) and (xf <= 120) and (xf >= -120) and (yf >= 0) and (yf <= ball_distance + 40):
+                hurt_animation(enemy_list[enemy])
+                wn.tracer(False)
+                enemy_list[enemy].goto(10**99,10**99)
+                make_coin(enemy, xe, ye)
+                wn.tracer(True)
+            #DOWN
+            elif (direction == 2) and (xf <= 120) and (xf >= -120) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
+                hurt_animation(enemy_list[enemy])
+                wn.tracer(False)
+                enemy_list[enemy].goto(10**99,10**99)
+                make_coin(enemy, xe, ye)
+                wn.tracer(True)
+            #LEFT
+            elif direction == 3 and (yf <= 120) and (yf >= -120) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
+                hurt_animation(enemy_list[enemy])
+                wn.tracer(False)
+                enemy_list[enemy].goto(10**99,10**99)
+                make_coin(enemy, xe, ye)
+                wn.tracer(True)
+            #RIGHT
+            elif direction == 4 and (yf <= 120) and (yf >= -120) and (xf >= 0) and (xf <= ball_distance + 40):
+                hurt_animation(enemy_list[enemy])
+                wn.tracer(False)
+                enemy_list[enemy].goto(10**99,10**99)
+                make_coin(enemy, xe, ye)
+                wn.tracer(True)
 
 #GETS THE CHARACTER READY TO ATTACK
 def set_attack():
@@ -425,10 +525,10 @@ def draw_gridy():
 def player_bound():
     x = player.xcor()
     y = player.ycor()
-    if x > 880:
+    if x > 920:
         check_coin()
         player.goto((x-80)*-1,y)
-    elif x < -880:
+    elif x < -920:
         check_coin()
         player.goto((x+80)*-1,y)
     elif y > 520:
@@ -448,6 +548,7 @@ def player_bound():
 def up():
     global attack_status, menu_status, timer
     if attack_status == 0 and menu_status == 0:
+        attack_status = 4
         wn.tracer(False)
         player.setheading(90)
         player.forward(80)
@@ -460,11 +561,14 @@ def up():
             timer = timer - 1
         elif timer <= 0:
             timer = timer_max
+            attack_status == 4
             make_enemy()
+        attack_status = 0
 #MOVES CHARACTER DOWN, THEN DOES ENEMY MOVEMENT
 def down():
     global attack_status, menu_status, timer
     if attack_status == 0 and menu_status == 0:
+        attack_status = 4
         wn.tracer(False)
         player.setheading(270)
         player.forward(80)
@@ -477,11 +581,14 @@ def down():
             timer = timer - 1
         elif timer <= 0:
             timer = timer_max
+            attack_status == 4
             make_enemy()
+        attack_status = 0
 #MOVES CHARACTER LEFT, THEN DOES ENEMY MOVEMENT
 def left():
     global attack_status, menu_status, timer
     if attack_status == 0 and menu_status == 0:
+        attack_status = 4
         wn.tracer(False)
         player.setheading(180)
         player.forward(80)
@@ -494,11 +601,14 @@ def left():
             timer = timer - 1
         elif timer <= 0:
             timer = timer_max
+            attack_status == 4
             make_enemy()
+        attack_status = 0
 #MOVES CHARACTER RIGHT, THEN DOES ENEMY MOVEMENT
 def right():
     global attack_status, menu_status, timer
     if attack_status == 0 and menu_status == 0:
+        attack_status = 4
         wn.tracer(False)
         player.setheading(0)
         player.forward(80)
@@ -512,6 +622,7 @@ def right():
         elif timer <= 0:
             timer = timer_max
             make_enemy()
+        attack_status = 0
 #MAKES MENU/SHOP
 def make_menu():
     global menu_status
@@ -543,6 +654,26 @@ def make_menu():
         drawer.goto(-350,-300)
         #drawer.color(c3)
         drawer.write("EXPERT MODE", font=("Impact", 40, "bold"))
+        if spread == True:
+            drawer.goto(180,20)
+            drawer.color("green")
+            drawer.begin_fill()
+            drawer.circle(10)
+            drawer.end_fill()
+            drawer.pensize(4)
+            drawer.color("black")
+            drawer.circle(10)
+            drawer.pensize(1)
+        if timer_max == 5:
+            drawer.goto(-40,-280)
+            drawer.color("green")
+            drawer.begin_fill()
+            drawer.circle(10)
+            drawer.end_fill()
+            drawer.pensize(4)
+            drawer.color("black")
+            drawer.circle(10)
+            drawer.pensize(1)
         drawer.color("white")
         pointer.showturtle()
         wn.tracer(True)
@@ -580,38 +711,92 @@ def pointer_down():
         pointer_possition = pointer_possition + 1
 
 def select_menu():
-    global menu_status, pointer_possition, ball_distance, coins, price
-    if menu_status == 1 and pointer_possition == 1 and coins >= price and price < 130:
-        wn.tracer(False)
-        ball_distance = ball_distance + 160
-        coins = coins - price
-        price = price + 10
-        if price >= 50 and price < 80:
-            ball.speed(6)
-        make_menu()
-        make_menu()
-        wn.tracer(True)
-        display_coins()
-    elif menu_status == 1 and pointer_possition == 1 and (coins < price or price >= 130):
-        drawer.pu()
-        drawer.goto(300,300)
-        drawer.pendown()
-        drawer.pensize(15)
-        drawer.color("red")
-        drawer.goto(-300,-300)
-        drawer.pu()
-        drawer.goto(-300,300)
-        drawer.pendown()
-        drawer.goto(300,-300)
-        drawer.pensize(1)
-        drawer.color("white")
-        time.sleep(.5)
-        wn.tracer(False)
-        drawer.clear()
-        menu_status = 0
-        make_menu()
-        wn.tracer(True)
-        
+    global menu_status, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation
+    if animation == False:
+        if menu_status == 1 and pointer_possition == 1 and coins >= price and price < 130:
+            animation = True
+            wn.tracer(False)
+            ball_distance = ball_distance + 160
+            coins = coins - price
+            price = price + 10
+            if price >= 50 and price < 80:
+                ball.speed(6)
+            elif price >= 80:
+                ball.speed(7)
+            menu_status = 0
+            make_menu()
+            wn.tracer(True)
+            display_coins()
+            animation = False
+        elif menu_status == 1 and pointer_possition == 1 and (coins < price or price >= 130):
+            animation = True
+            drawer.pu()
+            drawer.goto(300,300)
+            drawer.pendown()
+            drawer.pensize(15)
+            drawer.color("red")
+            drawer.goto(-300,-300)
+            drawer.pu()
+            drawer.goto(-300,300)
+            drawer.pendown()
+            drawer.goto(300,-300)
+            drawer.pensize(1)
+            drawer.color("white")
+            time.sleep(.5)
+            wn.tracer(False)
+            drawer.clear()
+            menu_status = 0
+            make_menu()
+            wn.tracer(True)
+            animation = False
+        elif menu_status == 1 and pointer_possition == 2 and coins >= 100 and spread == False:
+            animation = True
+            wn.tracer(False)
+            coins = coins - 100
+            spread = True
+            timer_max = 5
+            if timer > timer_max:
+                timer = timer - timer_max
+            menu_status = 0
+            make_menu()
+            wn.tracer(True)
+            animation = False
+        elif menu_status == 1 and pointer_possition == 2 and coins < 100 or spread == True:
+            animation = True
+            drawer.pu()
+            drawer.goto(300,300)
+            drawer.pendown()
+            drawer.pensize(15)
+            drawer.color("red")
+            drawer.goto(-300,-300)
+            drawer.pu()
+            drawer.goto(-300,300)
+            drawer.pendown()
+            drawer.goto(300,-300)
+            drawer.pensize(1)
+            drawer.color("white")
+            time.sleep(.5)
+            wn.tracer(False)
+            drawer.clear()
+            menu_status = 0
+            make_menu()
+            wn.tracer(True)
+            animation = False
+        elif menu_status == 1 and pointer_possition == 3 and timer_max == 10:
+            animation = True
+            timer_max = 5
+            if timer > timer_max:
+                timer = timer - timer_max
+            menu_status = 0
+            make_menu()
+            animation = False
+        elif menu_status == 1 and pointer_possition == 3 and timer_max == 5 and spread != True:
+            animation = True
+            timer_max = 10
+            menu_status = 0
+            make_menu()
+            animation = False
+
 #---------Main---------
 menu_status = 0
 drawer.goto(1920,1000)
