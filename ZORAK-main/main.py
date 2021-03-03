@@ -21,6 +21,7 @@ wn.addshape("Main_Character_Dead.gif")
 player = trtl.Turtle()
 player.pu()
 player.shape("Main_Character.gif")
+player.speed(6)
 
 ball = trtl.Turtle()
 ball.pu()
@@ -93,6 +94,13 @@ price = 20
 
 spread = False
 animation = False
+
+combo = 0
+combo_boy = trtl.Turtle()
+combo_boy.color("lime")
+combo_boy.hideturtle()
+combo_boy.pu()
+combo_boy.goto(-950,380)
 wn.tracer(True)
 #---------Functions---------
 #MAKES AN EXPLOSION AT THE SPECIFIED COORDINATE
@@ -108,6 +116,18 @@ def explosion_animation(xe, ye):
     explosion.hideturtle()
     explosion.shape("explosion1.gif")
 
+#PICKS UP ALL COINS ON BOARD
+def pickup_coins():
+    x = player.xcor()
+    y = player.ycor()
+    for i in range(coin_count):
+        ye = coin_list[i].ycor()
+        xe = coin_list[i].xcor()
+        if ye < 10000:
+            player.goto(xe,ye)
+            check_coin()
+    player.goto(x,y)
+            
 #MAKES ALL ENEMIES DO A BASIC FUNCTION
 def all_enemy(function):
     for i in range(enemy_count):
@@ -117,13 +137,18 @@ def all_enemy(function):
 
 #MAKES ALL ENEMIES ATTACK
 def all_enemy_attack(function):
-    global wait
+    global wait, combo
     for i in range(enemy_count):
         ye = enemy_list[i].ycor()
         if ye < 10000:
             function(enemy_list[i])
     if wait > 0:
         wait = wait - 1
+        if wait == 0:
+            if combo >= 10:
+                pickup_coins()
+            combo = 0
+            display_combo()
 
 #CHECKS TO SEE IF ENEMIES TAKE DAMAGE
 def all_enemy_damage(direction):
@@ -158,11 +183,12 @@ def all_enemy_damage(direction):
 
 #OGY MAKES A GUEST APPEARANCE AND KILLS EVERYTHING ON THE SCREEN
 def kill_everything():
-    global ook, attack_status
+    global ook, attack_status, combo, wait
     if ook != 1:
         hold = attack_status
         attack_status = 1
         ook = 1
+        a = 0
         ogy.showturtle()
         time.sleep(.5)
         for i in range(enemy_count):
@@ -170,10 +196,14 @@ def kill_everything():
             ye = enemy_list[i].ycor()
             if ye < 10000:
                 explosion_animation(xe, ye)
+                a = a + 1
             make_coin(i, xe, ye)
             wn.tracer(False)
             enemy_list[i].goto(10**99,10**99)
         ogy.hideturtle()
+        combo = combo + a
+        wait = 1
+        display_combo()
         wn.tracer(True)
         ook = 0
         attack_status = hold
@@ -382,7 +412,7 @@ def enemy_move(enemy):
 
 #MAKES THE PLAYER ATTACK, CHECKS TO SEE IF IT HITS, THEN MAKES MULTIPLE ANIMATIONS
 def player_attack(direction,enemy):
-    global attack_status, ball_distance, enemy_list
+    global attack_status, ball_distance, enemy_list, combo, wait
     if attack_status == 1:
         xe = enemy_list[enemy].xcor()
         ye = enemy_list[enemy].ycor()
@@ -397,6 +427,9 @@ def player_attack(direction,enemy):
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
                 make_coin(enemy, xe, ye)
+                combo = combo + 1
+                display_combo()
+                wait = 3
                 wn.tracer(True)
             #DOWN
             elif (direction == 2) and (xf <= 40) and (xf >= -40) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
@@ -404,6 +437,9 @@ def player_attack(direction,enemy):
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
                 make_coin(enemy, xe, ye)
+                combo = combo + 1
+                display_combo()
+                wait = 3
                 wn.tracer(True)
             #LEFT
             elif direction == 3 and (yf <= 40) and (yf >= -40) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
@@ -411,6 +447,9 @@ def player_attack(direction,enemy):
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
                 make_coin(enemy, xe, ye)
+                combo = combo + 1
+                display_combo()
+                wait = 3
                 wn.tracer(True)
             #RIGHT
             elif direction == 4 and (yf <= 40) and (yf >= -40) and (xf >= 0) and (xf <= ball_distance + 40):
@@ -418,6 +457,9 @@ def player_attack(direction,enemy):
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
                 make_coin(enemy, xe, ye)
+                combo = combo + 1
+                display_combo()
+                wait = 3
                 wn.tracer(True)
         elif spread == True:
             #UP
@@ -426,6 +468,9 @@ def player_attack(direction,enemy):
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
                 make_coin(enemy, xe, ye)
+                combo = combo + 1
+                display_combo()
+                wait = 3
                 wn.tracer(True)
             #DOWN
             elif (direction == 2) and (xf <= 120) and (xf >= -120) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
@@ -433,6 +478,9 @@ def player_attack(direction,enemy):
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
                 make_coin(enemy, xe, ye)
+                combo = combo + 1
+                display_combo()
+                wait = 3
                 wn.tracer(True)
             #LEFT
             elif direction == 3 and (yf <= 120) and (yf >= -120) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
@@ -440,6 +488,9 @@ def player_attack(direction,enemy):
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
                 make_coin(enemy, xe, ye)
+                combo = combo + 1
+                display_combo()
+                wait = 3
                 wn.tracer(True)
             #RIGHT
             elif direction == 4 and (yf <= 120) and (yf >= -120) and (xf >= 0) and (xf <= ball_distance + 40):
@@ -447,6 +498,9 @@ def player_attack(direction,enemy):
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
                 make_coin(enemy, xe, ye)
+                combo = combo + 1
+                display_combo()
+                wait = 3
                 wn.tracer(True)
 
 #GETS THE CHARACTER READY TO ATTACK
@@ -506,7 +560,11 @@ def display_coins():
     global player_health
     coin_boy.clear()
     coin_boy.write(str(coins) + " Coins", font=("Impact", 40, "bold"))
-    
+
+def display_combo():
+    global combo
+    combo_boy.clear()
+    combo_boy.write("Combo: " + str(combo), font=("Impact", 40, "bold"))
 #DRAWS VERTICAL LINES FOR GRID (I KNOW THE NAME IS HORRIBLE)
 def draw_gridx():
     vertical = 1000
@@ -721,9 +779,10 @@ def pointer_down():
         pointer.goto(x,y - 300)
         pointer_possition = pointer_possition + 1
 
+#USES POINTER TO BUY/SELECT THINGS IN SHOP
 def select_menu():
-    global menu_status, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation
-    if animation == False and player_health != 0:
+    global menu_status, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation, player_health
+    if animation == False and player_health > 0:
         if menu_status == 1 and pointer_possition == 1 and coins >= price and price < 130:
             animation = True
             wn.tracer(False)
@@ -808,6 +867,7 @@ def select_menu():
             menu_status = 0
             make_menu()
 
+#RESTARTS THE GAME ONCE GAME ENDS (AFTER PRESSING R)
 def restart():
     global coins, player_health, menu_status, spread, timer, timer_max, price, ball_distance
     if player_health == 0 and menu_status == 0:
@@ -820,6 +880,7 @@ def restart():
         make_enemy()
         make_enemy()
         coins = 0
+        wait = 0
         display_coins()
         player_health = 3
         price = 20
@@ -843,6 +904,7 @@ drawer.pendown()
 draw_gridy()
 display_health()
 display_coins()
+display_combo()
 make_enemy()
 make_enemy()
 
@@ -862,7 +924,8 @@ wn.onkey(make_menu, 'm')
 
 wn.onkey(pointer_up, "Up")
 wn.onkey(pointer_down, "Down")
-#wn.onkey(kill_everything, "g")
+#wn.onkey(kill_everything, "k")
+#wn.onkey(pickup_coins, 'p')
 
 wn.onkey(select_menu, "b")
 wn.onkey(restart, 'r')
