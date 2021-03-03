@@ -17,6 +17,8 @@ wn.addshape("explosion1.gif")
 wn.addshape("explosion2.gif")
 wn.addshape("explosion3.gif")
 wn.addshape("Main_Character_Dead.gif")
+wn.addshape("Boss.gif")
+wn.addshape("Target.gif")
 
 player = trtl.Turtle()
 player.pu()
@@ -101,8 +103,70 @@ combo_boy.color("lime")
 combo_boy.hideturtle()
 combo_boy.pu()
 combo_boy.goto(-950,380)
+
+
+toitle_fight = False
+toitle = trtl.Turtle()
+toitle.pu()
+toitle.hideturtle()
+toitle.speed(3)
+toitle.shape("Boss.gif")
+toitle.goto(480,-160)
+
+toitle_attack_up = trtl.Turtle()
+toitle_attack_down = trtl.Turtle()
+toitle_attack_left = trtl.Turtle()
+toitle_attack_right = trtl.Turtle()
+toitle_attack_up.pu()
+toitle_attack_down.pu()
+toitle_attack_left.pu()
+toitle_attack_right.pu()
+toitle_attack_up.shape("Target.gif")
+toitle_attack_down.shape("Target.gif")
+toitle_attack_left.shape("Target.gif")
+toitle_attack_right.shape("Target.gif")
+toitle_attack_up.hideturtle()
+toitle_attack_down.hideturtle()
+toitle_attack_left.hideturtle()
+toitle_attack_right.hideturtle()
+toitle_attack_up.goto(480,-160)
+toitle_attack_down.goto(480,-160)
+toitle_attack_left.goto(480,-160)
+toitle_attack_right.goto(480,-160)
+toitle_attack_up.speed(6)
+toitle_attack_down.speed(6)
+toitle_attack_left.speed(6)
+toitle_attack_right.speed(6)
+
+toitle_attacking_target = False
 wn.tracer(True)
 #---------Functions---------
+
+def start_boss():
+    global toitle_fight
+    if toitle_fight == False:
+        toitle.showturtle()
+        toitle.goto(560,0)
+        toitle_fight = True
+
+def toitle_attack():
+    global toitle_attacking_target
+    if toitle_fight == True:
+        if toitle_attacking_target == False:
+            a = random.randint(0,1)
+            if a == 1:
+                x = player.xcor()
+                y = player.ycor()
+                toitle_attack_up.showturtle()
+                toitle_attack_down.showturtle()
+                toitle_attack_left.showturtle()
+                toitle_attack_right.showturtle()
+                toitle_attack_up.goto(x,y + 80)
+                toitle_attack_down.goto(x,y - 80)
+                toitle_attack_left.goto(x - 80,y)
+                toitle_attack_right.goto(x + 80,y)
+
+
 #MAKES AN EXPLOSION AT THE SPECIFIED COORDINATE
 def explosion_animation(xe, ye):
     wn.tracer(False)
@@ -152,7 +216,7 @@ def all_enemy_attack(function):
 
 #CHECKS TO SEE IF ENEMIES TAKE DAMAGE
 def all_enemy_damage(direction):
-    global attack_status, enemy_list, enemy_count, timer
+    global attack_status, enemy_list, enemy_count, timer, wait
     if direction == 1:
         ball_animation(90)
     elif direction == 2:
@@ -177,6 +241,8 @@ def all_enemy_damage(direction):
     if timer <= 0:
         timer = timer_max
         make_enemy()
+    if wait > 0:
+        wait = wait - 1
     wn.tracer(True)
     attack_status = 0
     player.shape("Main_Character.gif")
@@ -352,7 +418,7 @@ def enemy_attack(enemy):
     ye = enemy.ycor()
     x = player.xcor()
     y = player.ycor()
-    if abs(xe - x) <= 80 and abs(ye - y) <= 80 and wait == 0:
+    if abs(xe - x) <= 120 and abs(ye - y) <= 120 and wait == 0:
         wait = 4
         player_health = player_health - 1
         hurt_animation(player)
@@ -429,7 +495,7 @@ def player_attack(direction,enemy):
                 make_coin(enemy, xe, ye)
                 combo = combo + 1
                 display_combo()
-                wait = 3
+                wait = 4
                 wn.tracer(True)
             #DOWN
             elif (direction == 2) and (xf <= 40) and (xf >= -40) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
@@ -439,7 +505,7 @@ def player_attack(direction,enemy):
                 make_coin(enemy, xe, ye)
                 combo = combo + 1
                 display_combo()
-                wait = 3
+                wait = 4
                 wn.tracer(True)
             #LEFT
             elif direction == 3 and (yf <= 40) and (yf >= -40) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
@@ -449,7 +515,7 @@ def player_attack(direction,enemy):
                 make_coin(enemy, xe, ye)
                 combo = combo + 1
                 display_combo()
-                wait = 3
+                wait = 4
                 wn.tracer(True)
             #RIGHT
             elif direction == 4 and (yf <= 40) and (yf >= -40) and (xf >= 0) and (xf <= ball_distance + 40):
@@ -459,7 +525,7 @@ def player_attack(direction,enemy):
                 make_coin(enemy, xe, ye)
                 combo = combo + 1
                 display_combo()
-                wait = 3
+                wait = 4
                 wn.tracer(True)
         elif spread == True:
             #UP
@@ -470,7 +536,7 @@ def player_attack(direction,enemy):
                 make_coin(enemy, xe, ye)
                 combo = combo + 1
                 display_combo()
-                wait = 3
+                wait = 4
                 wn.tracer(True)
             #DOWN
             elif (direction == 2) and (xf <= 120) and (xf >= -120) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
@@ -480,7 +546,7 @@ def player_attack(direction,enemy):
                 make_coin(enemy, xe, ye)
                 combo = combo + 1
                 display_combo()
-                wait = 3
+                wait = 4
                 wn.tracer(True)
             #LEFT
             elif direction == 3 and (yf <= 120) and (yf >= -120) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
@@ -490,7 +556,7 @@ def player_attack(direction,enemy):
                 make_coin(enemy, xe, ye)
                 combo = combo + 1
                 display_combo()
-                wait = 3
+                wait = 4
                 wn.tracer(True)
             #RIGHT
             elif direction == 4 and (yf <= 120) and (yf >= -120) and (xf >= 0) and (xf <= ball_distance + 40):
@@ -500,7 +566,7 @@ def player_attack(direction,enemy):
                 make_coin(enemy, xe, ye)
                 combo = combo + 1
                 display_combo()
-                wait = 3
+                wait = 4
                 wn.tracer(True)
 
 #GETS THE CHARACTER READY TO ATTACK
@@ -859,6 +925,7 @@ def select_menu():
                 timer = timer - timer_max
             animation = False
             menu_status = 0
+            start_boss()
             make_menu()
         elif menu_status == 1 and pointer_possition == 3 and timer_max == 5 and spread != True:
             animation = True
@@ -869,7 +936,7 @@ def select_menu():
 
 #RESTARTS THE GAME ONCE GAME ENDS (AFTER PRESSING R)
 def restart():
-    global coins, player_health, menu_status, spread, timer, timer_max, price, ball_distance
+    global coins, player_health, menu_status, spread, timer, timer_max, price, ball_distance, wait
     if player_health == 0 and menu_status == 0:
         wn.tracer(False)
         for i in range(enemy_count):
@@ -924,8 +991,9 @@ wn.onkey(make_menu, 'm')
 
 wn.onkey(pointer_up, "Up")
 wn.onkey(pointer_down, "Down")
-#wn.onkey(kill_everything, "k")
-#wn.onkey(pickup_coins, 'p')
+wn.onkey(kill_everything, "g")
+wn.onkey(pickup_coins, 'p')
+wn.onkey(toitle_attack,"o")
 
 wn.onkey(select_menu, "b")
 wn.onkey(restart, 'r')
