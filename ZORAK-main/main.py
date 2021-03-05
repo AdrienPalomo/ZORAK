@@ -19,6 +19,11 @@ wn.addshape("explosion3.gif")
 wn.addshape("Main_Character_Dead.gif")
 wn.addshape("Boss.gif")
 wn.addshape("Target.gif")
+wn.addshape("Warning.gif")
+wn.addshape("Rocket.gif")
+wn.addshape("Bullets.gif")
+wn.addshape("Remote.gif")
+wn.addshape("Broken_Remote.gif")
 
 player = trtl.Turtle()
 player.pu()
@@ -105,68 +110,306 @@ combo_boy.pu()
 combo_boy.goto(-950,380)
 
 
-toitle_fight = False
-toitle = trtl.Turtle()
-toitle.pu()
-toitle.hideturtle()
-toitle.speed(3)
-toitle.shape("Boss.gif")
-toitle.goto(480,-160)
+boss1_fight = False
+boss1 = trtl.Turtle()
+boss1.pu()
+boss1.hideturtle()
+boss1.speed(3)
+boss1.shape("Boss.gif")
+boss1.goto(480,-160)
 
-toitle_attack_up = trtl.Turtle()
-toitle_attack_down = trtl.Turtle()
-toitle_attack_left = trtl.Turtle()
-toitle_attack_right = trtl.Turtle()
-toitle_attack_up.pu()
-toitle_attack_down.pu()
-toitle_attack_left.pu()
-toitle_attack_right.pu()
-toitle_attack_up.shape("Target.gif")
-toitle_attack_down.shape("Target.gif")
-toitle_attack_left.shape("Target.gif")
-toitle_attack_right.shape("Target.gif")
-toitle_attack_up.hideturtle()
-toitle_attack_down.hideturtle()
-toitle_attack_left.hideturtle()
-toitle_attack_right.hideturtle()
-toitle_attack_up.goto(480,-160)
-toitle_attack_down.goto(480,-160)
-toitle_attack_left.goto(480,-160)
-toitle_attack_right.goto(480,-160)
-toitle_attack_up.speed(6)
-toitle_attack_down.speed(6)
-toitle_attack_left.speed(6)
-toitle_attack_right.speed(6)
+boss1_attack_up = trtl.Turtle()
+boss1_attack_down = trtl.Turtle()
+boss1_attack_left = trtl.Turtle()
+boss1_attack_right = trtl.Turtle()
+boss1_attack_up.pu()
+boss1_attack_down.pu()
+boss1_attack_left.pu()
+boss1_attack_right.pu()
+boss1_attack_up.shape("Target.gif")
+boss1_attack_down.shape("Target.gif")
+boss1_attack_left.shape("Target.gif")
+boss1_attack_right.shape("Target.gif")
+boss1_attack_up.hideturtle()
+boss1_attack_down.hideturtle()
+boss1_attack_left.hideturtle()
+boss1_attack_right.hideturtle()
+boss1_attack_up.goto(480,-160)
+boss1_attack_down.goto(480,-160)
+boss1_attack_left.goto(480,-160)
+boss1_attack_right.goto(480,-160)
+boss1_attack_up.speed(8)
+boss1_attack_down.speed(8)
+boss1_attack_left.speed(8)
+boss1_attack_right.speed(8)
 
-toitle_attacking_target = False
+boss1_attacking_target = False
+boss1_attacking_bullet = False
+
+warning_1 = trtl.Turtle()
+warning_2 = trtl.Turtle()
+warning_1.pu()
+warning_2.pu()
+warning_1.shape("Warning.gif")
+warning_2.shape("Warning.gif")
+warning_1.hideturtle()
+warning_2.hideturtle()
+warning_1.speed(8)
+warning_2.speed(8)
+
+rocketman = trtl.Turtle()
+rocketman.pu()
+rocketman.hideturtle()
+rocketman.speed(6)
+rocketman.shape("Rocket.gif")
+
+remote_1 = trtl.Turtle()
+remote_2 = trtl.Turtle()
+remote_3 = trtl.Turtle()
+remote_1.pu()
+remote_2.pu()
+remote_3.pu()
+remote_1.hideturtle()
+remote_2.hideturtle()
+remote_3.hideturtle()
+remote_1.shape("Remote.gif")
+remote_2.shape("Remote.gif")
+remote_3.shape("Remote.gif")
+
+first_remote = True
+second_remote = True
+third_remote = True
+
+boss_health = 3
 wn.tracer(True)
 #---------Functions---------
+def remote_check():
+    global first_remote, second_remote, third_remote, boss_health, boss1_fight, boss1_attacking_target, boss1_attacking_bullet
+    if boss1_fight == True:
+        x = player.xcor()
+        y = player.ycor()
+        if first_remote == True:
+            xr = remote_1.xcor()
+            yr = remote_1.ycor()
+            xf = x - xr
+            yf = y - yr
+            if (xf >= -40) and (xf <= 40) and (yf >= -40) and (yf <= 40):
+                rocket_animation(boss1)
+                time.sleep(.05)
+                remote_1.shape("Broken_Remote.gif")
+                boss_health = boss_health - 1
+                player.goto(-11 * 80, 0)
+                boss1_attacking_target = False
+                boss1_attacking_bullet = False
+                warning_1.hideturtle()
+                warning_2.hideturtle()
+                boss1_attack_up.hideturtle()
+                boss1_attack_down.hideturtle()
+                boss1_attack_left.hideturtle()
+                boss1_attack_right.hideturtle()
+                first_remote = False
+        if second_remote == True:
+            xr = remote_2.xcor()
+            yr = remote_2.ycor()
+            xf = x - xr
+            yf = y - yr
+            if (xf >= -40) and (xf <= 40) and (yf >= -40) and (yf <= 40):
+                rocket_animation(boss1)
+                time.sleep(.05)
+                remote_2.shape("Broken_Remote.gif")
+                boss_health = boss_health - 1
+                player.goto(-11 * 80, 0)
+                boss1_attacking_target = False
+                boss1_attacking_bullet = False
+                warning_1.hideturtle()
+                warning_2.hideturtle()
+                boss1_attack_up.hideturtle()
+                boss1_attack_down.hideturtle()
+                boss1_attack_left.hideturtle()
+                boss1_attack_right.hideturtle()
+                second_remote = False
+        if third_remote == True:
+            xr = remote_3.xcor()
+            yr = remote_3.ycor()
+            xf = x - xr
+            yf = y - yr
+            if (xf >= -40) and (xf <= 40) and (yf >= -40) and (yf <= 40):
+                rocket_animation(boss1)
+                time.sleep(.05)
+                remote_3.shape("Broken_Remote.gif")
+                boss_health = boss_health - 1
+                player.goto(-11 * 80, 0)
+                boss1_attacking_target = False
+                boss1_attacking_bullet = False
+                warning_1.hideturtle()
+                warning_2.hideturtle()
+                boss1_attack_up.hideturtle()
+                boss1_attack_down.hideturtle()
+                boss1_attack_left.hideturtle()
+                boss1_attack_right.hideturtle()
+                third_remote = False
+        if boss_health == 0:
+            xe = boss1.xcor()
+            ye = boss1.ycor()
+            explosion_animation(xe - 160,ye + 80)
+            explosion_animation(xe + 80,ye + 80)
+            explosion_animation(xe,ye - 160)
+            warning_1.hideturtle()
+            warning_2.hideturtle()
+            boss1_attack_up.hideturtle()
+            boss1_attack_down.hideturtle()
+            boss1_attack_left.hideturtle()
+            boss1_attack_right.hideturtle()
+            boss1.hideturtle()
+            boss1_attacking_target = False
+            boss1_attacking_bullet = False
+            boss1_fight = False
+            remote_1.hideturtle()
+            remote_2.hideturtle()
+            remote_3.hideturtle()
+
+def rocket_animation(turtle):
+    xt = turtle.xcor()
+    yt = turtle.ycor()
+    wn.tracer(False)
+    rocketman.goto(xt, 540)
+    rocketman.showturtle()
+    wn.tracer(True)
+    rocketman.goto(xt,yt)
+    rocketman.shape("explosion1.gif")
+    time.sleep(.01)
+    rocketman.hideturtle()
+    rocketman.shape("Rocket.gif")
+
+def bullet_animation(turtle):
+     turtle.shape("Bullets.gif")
+     yt = turtle.ycor()
+     turtle.goto(-960,yt)
+     turtle.hideturtle()
+     turtle.shape("Warning.gif")
+
+def check_target(turtle):
+    global player_health
+    xt = turtle.xcor()
+    yt = turtle.ycor()
+    x = player.xcor()
+    y = player.ycor()
+    xf = xt - x
+    yf = yt - y
+    if (xf >= -40) and (xf <= 40) and (yf >= -40) and (yf <= 40):
+        player_health = player_health - 1
+
+def check_bullet(turtle, hold):
+    global player_health
+    xt = turtle.xcor()
+    yt = turtle.ycor()
+    x = player.xcor()
+    y = player.ycor()
+    xf = xt - x
+    yf = yt - y
+    if(yf >= -40) and (yf <= 40) and (hold - player_health != 1):
+        player_health = player_health - 1
 
 def start_boss():
-    global toitle_fight
-    if toitle_fight == False:
-        toitle.showturtle()
-        toitle.goto(560,0)
-        toitle_fight = True
+    global boss1_fight, timer, timer_max
+    if boss1_fight == False:
+        boss1.showturtle()
+        boss1.goto(560,0)
+        boss1_fight = True
+        timer = 8
+        timer_max = 8
+        wn.tracer(False)
+        for i in range(enemy_count):
+            enemy_list[i].goto(10**99,10**99)
+        a = random.randint(4,6)
+        remote_1.goto(320,a*80)
+        a = random.randint(-1,1)
+        remote_2.goto(320,a*80)
+        a = random.randint(-6,-4)
+        remote_3.goto(320,a*80)
+        remote_1.showturtle()
+        remote_2.showturtle()
+        remote_3.showturtle()
+        player.goto(-11 * 80, 0)
+        wn.tracer(True)
 
-def toitle_attack():
-    global toitle_attacking_target
-    if toitle_fight == True:
-        if toitle_attacking_target == False:
-            a = random.randint(0,1)
+def boss1_attack():
+    global boss1_attacking_target, menu_status, player_health, boss1_attacking_bullet, combo
+    if boss1_fight == True and player_health != 0 and combo == 0:
+        if boss1_attacking_target == False:
+            a = random.randint(0,5)
             if a == 1:
                 x = player.xcor()
                 y = player.ycor()
-                toitle_attack_up.showturtle()
-                toitle_attack_down.showturtle()
-                toitle_attack_left.showturtle()
-                toitle_attack_right.showturtle()
-                toitle_attack_up.goto(x,y + 80)
-                toitle_attack_down.goto(x,y - 80)
-                toitle_attack_left.goto(x - 80,y)
-                toitle_attack_right.goto(x + 80,y)
-
-
+                hold = menu_status
+                menu_status = 10
+                boss1_attack_up.showturtle()
+                boss1_attack_down.showturtle()
+                boss1_attack_left.showturtle()
+                boss1_attack_right.showturtle()
+                boss1_attack_up.goto(x,y + 80)
+                boss1_attack_down.goto(x,y - 80)
+                boss1_attack_left.goto(x - 80,y)
+                boss1_attack_right.goto(x + 80,y)
+                menu_status = hold
+                boss1_attacking_target = True
+        elif boss1_attacking_target == True:
+            wn.tracer(False)
+            hold = player_health
+            check_target(boss1_attack_up)
+            check_target(boss1_attack_down)
+            check_target(boss1_attack_left)
+            check_target(boss1_attack_right)
+            boss1_attack_up.hideturtle()
+            boss1_attack_down.hideturtle()
+            boss1_attack_left.hideturtle()
+            boss1_attack_right.hideturtle()
+            wn.tracer(True)
+            rocket_animation(boss1_attack_up)
+            rocket_animation(boss1_attack_left)
+            rocket_animation(boss1_attack_down)
+            rocket_animation(boss1_attack_right)
+            wn.tracer(False)
+            if hold - player_health == 1:
+                wn.tracer(True)
+                hurt_animation(player)
+                wn.tracer(False)
+            boss1_attack_up.goto(480,-160)
+            boss1_attack_down.goto(480,-160)
+            boss1_attack_left.goto(480,-160)
+            boss1_attack_right.goto(480,-160)
+            boss1_attacking_target = False
+            wn.tracer(True)
+            display_health()
+        if boss1_attacking_bullet == False:
+            b = random.randint(0,4)
+            if b == 1:
+                wn.tracer(False)
+                yt = random.randint(-6,6)
+                warning_1.goto(400,yt * 80)
+                yt = random.randint(-6,6)
+                warning_2.goto(400,yt * 80)
+                warning_1.showturtle()
+                warning_2.showturtle()
+                wn.tracer(True)
+                boss1_attacking_bullet = True
+        elif boss1_attacking_bullet == True:
+            hold = player_health
+            check_bullet(warning_1, hold)
+            check_bullet(warning_2, hold)
+            bullet_animation(warning_1)
+            bullet_animation(warning_2)
+            if hold - player_health == 1:
+                hurt_animation(player)
+            warning_1.hideturtle()
+            warning_2.hideturtle()
+            wn.tracer(False)
+            warning_1.goto(10**99,10**99)
+            warning_2.goto(10**99,10**99)
+            wn.tracer(True)
+            display_health()
+            boss1_attacking_bullet = False
+            
 #MAKES AN EXPLOSION AT THE SPECIFIED COORDINATE
 def explosion_animation(xe, ye):
     wn.tracer(False)
@@ -237,6 +480,7 @@ def all_enemy_damage(direction):
     all_enemy(enemy_move)
     time.sleep(.05)
     all_enemy(enemy_attack)
+    boss1_attack()
     timer = timer - 1
     if timer <= 0:
         timer = timer_max
@@ -298,17 +542,28 @@ def make_enemy():
     enemy_list[enemy_count] = trtl.Turtle()
     enemy_list[enemy_count].shape("Enemy.gif")
     enemy_list[enemy_count].pu()
-    xe = (random.randint(-11,11)) * 80
-    ye = (random.randint(-6,6)) * 80
     x = player.xcor()
     y = player.ycor()
     check = False
-    while check == False:
-        if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
-            xe = (random.randint(-11,11)) * 80
-            ye = (random.randint(-6,6)) * 80
-        else:
-            check = True
+    if boss1_fight == False:
+        xe = (random.randint(-11,11)) * 80
+        ye = (random.randint(-6,6)) * 80
+        while check == False:
+            if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
+                xe = (random.randint(-11,11)) * 80
+                ye = (random.randint(-6,6)) * 80
+            else:
+                check = True
+                
+    elif boss1_fight == True:
+        xe = (random.randint(6,11)) * 80
+        ye = (random.randint(-6,6)) * 80
+        while check == False:
+            if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
+                xe = (random.randint(6,11)) * 80
+                ye = (random.randint(-6,6)) * 80
+            else:
+                check = True
     enemy_list[enemy_count].goto(xe, ye)
     enemy_count = enemy_count + 1
     wn.tracer(True)
@@ -617,6 +872,13 @@ def display_health():
             enemy_list[i].goto(10**99,10**99)
         for i in range(coin_count):
             coin_list[i].goto(10**99,10**99)
+        warning_1.hideturtle()
+        warning_2.hideturtle()
+        boss1_attack_up.hideturtle()
+        boss1_attack_down.hideturtle()
+        boss1_attack_left.hideturtle()
+        boss1_attack_right.hideturtle()
+        boss1.hideturtle()
         player.shape("Main_Character_Dead.gif")
         drawer.goto(-170,-10)
         drawer.write("Press r to restart", font=("Impact", 40, "bold"))
@@ -657,6 +919,7 @@ def draw_gridy():
     
 #IF PLAYER STEPS OUT OF BOUNDS, THIS TELEPORTS THEM TO THE OTHER SIDE
 def player_bound():
+    global boss1_fight
     x = player.xcor()
     y = player.ycor()
     if x > 920:
@@ -664,7 +927,10 @@ def player_bound():
         player.goto((x-80)*-1,y)
     elif x < -920:
         check_coin()
-        player.goto((x+80)*-1,y)
+        if boss1_fight == False:
+            player.goto((x+80)*-1,y)
+        elif boss1_fight == True:
+            player.goto(x + 80, y)
     elif y > 520:
         check_coin()
         player.goto(x,(y-80)*-1)
@@ -688,6 +954,7 @@ def up():
         player.forward(80)
         player_bound()
         wn.tracer(True)
+        remote_check()
         all_enemy(enemy_move)
         time.sleep(.05)
         all_enemy_attack(enemy_attack)
@@ -697,6 +964,7 @@ def up():
             elif timer <= 0:
                 timer = timer_max
                 make_enemy()
+        boss1_attack()
         attack_status = 0
 #MOVES CHARACTER DOWN, THEN DOES ENEMY MOVEMENT
 def down():
@@ -708,6 +976,7 @@ def down():
         player.forward(80)
         player_bound()
         wn.tracer(True)
+        remote_check()
         all_enemy(enemy_move)
         time.sleep(.05)
         all_enemy_attack(enemy_attack)
@@ -717,6 +986,7 @@ def down():
             elif timer <= 0:
                 timer = timer_max
                 make_enemy()
+        boss1_attack()
         attack_status = 0
 #MOVES CHARACTER LEFT, THEN DOES ENEMY MOVEMENT
 def left():
@@ -728,6 +998,7 @@ def left():
         player.forward(80)
         player_bound()
         wn.tracer(True)
+        remote_check()
         all_enemy(enemy_move)
         time.sleep(.05)
         all_enemy_attack(enemy_attack)
@@ -737,6 +1008,7 @@ def left():
             elif timer <= 0:
                 timer = timer_max
                 make_enemy()
+        boss1_attack()
         attack_status = 0
 #MOVES CHARACTER RIGHT, THEN DOES ENEMY MOVEMENT
 def right():
@@ -748,6 +1020,7 @@ def right():
         player.forward(80)
         player_bound()
         wn.tracer(True)
+        remote_check()
         all_enemy(enemy_move)
         time.sleep(.05)
         all_enemy_attack(enemy_attack)
@@ -757,6 +1030,7 @@ def right():
             elif timer <= 0:
                 timer = timer_max
                 make_enemy()
+        boss1_attack()
         attack_status = 0
 #MAKES MENU/SHOP
 def make_menu():
@@ -787,7 +1061,7 @@ def make_menu():
             drawer.goto(-350,0)
             drawer.write("SPREAD SHOT: 100 GOLD", font=("Impact", 40, "bold"))
             drawer.goto(-350,-300)
-            drawer.write("EXPERT MODE", font=("Impact", 40, "bold"))
+            drawer.write("START BOSS FIGHT", font=("Impact", 40, "bold"))
             display_coins()
             if spread == True:
                 drawer.goto(180,20)
@@ -799,8 +1073,8 @@ def make_menu():
                 drawer.color("black")
                 drawer.circle(10)
                 drawer.pensize(1)
-            if timer_max == 5:
-                drawer.goto(-40,-280)
+            if boss1_fight == True:
+                drawer.goto(60,-280)
                 drawer.color("green")
                 drawer.begin_fill()
                 drawer.circle(10)
@@ -847,7 +1121,7 @@ def pointer_down():
 
 #USES POINTER TO BUY/SELECT THINGS IN SHOP
 def select_menu():
-    global menu_status, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation, player_health
+    global menu_status, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation, player_health, boss1_fight
     if animation == False and player_health > 0:
         if menu_status == 1 and pointer_possition == 1 and coins >= price and price < 130:
             animation = True
@@ -918,7 +1192,7 @@ def select_menu():
             animation = False
             menu_status = 0
             make_menu()
-        elif menu_status == 1 and pointer_possition == 3 and timer_max == 10:
+        elif menu_status == 1 and pointer_possition == 3 and boss1_fight == False:
             animation = True
             timer_max = 5
             if timer > timer_max:
@@ -927,16 +1201,31 @@ def select_menu():
             menu_status = 0
             start_boss()
             make_menu()
-        elif menu_status == 1 and pointer_possition == 3 and timer_max == 5 and spread != True:
+        elif menu_status == 1 and pointer_possition == 3 and boss1_fight == True:
             animation = True
-            timer_max = 10
+            drawer.pu()
+            drawer.goto(300,300)
+            drawer.pendown()
+            drawer.pensize(15)
+            drawer.color("red")
+            drawer.goto(-300,-300)
+            drawer.pu()
+            drawer.goto(-300,300)
+            drawer.pendown()
+            drawer.goto(300,-300)
+            drawer.pensize(1)
+            drawer.color("white")
+            time.sleep(.5)
+            wn.tracer(False)
+            drawer.clear()
+            wn.tracer(True)
             animation = False
             menu_status = 0
             make_menu()
 
 #RESTARTS THE GAME ONCE GAME ENDS (AFTER PRESSING R)
 def restart():
-    global coins, player_health, menu_status, spread, timer, timer_max, price, ball_distance, wait
+    global coins, player_health, menu_status, spread, timer, timer_max, price, ball_distance, wait, boss1_attacking_target, boss1_attacking_bullet, boss1_fight
     if player_health == 0 and menu_status == 0:
         wn.tracer(False)
         for i in range(enemy_count):
@@ -955,6 +1244,9 @@ def restart():
         ball.speed(4)
         menu_status = 1
         make_menu()
+        boss1_attacking_target = False
+        boss1_attacking_bullet = False
+        boss1_fight = False
         spread = False
         timer = 10
         timer_max = 10
@@ -993,7 +1285,7 @@ wn.onkey(pointer_up, "Up")
 wn.onkey(pointer_down, "Down")
 wn.onkey(kill_everything, "g")
 wn.onkey(pickup_coins, 'p')
-wn.onkey(toitle_attack,"o")
+wn.onkey(boss1_attack,"o")
 
 wn.onkey(select_menu, "b")
 wn.onkey(restart, 'r')
