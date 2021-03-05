@@ -181,10 +181,20 @@ second_remote = True
 third_remote = True
 
 boss_health = 3
+boss1_win = False
+
+ice_world = False
 wn.tracer(True)
 #---------Functions---------
+#KILLS BOSS FOR EASY TESTING
+def kill_boss():
+    global boss_health
+    boss_health = 0
+    remote_check()
+
+#CHECKS TO SEE IF PLAYER IS STANDING ON A REMOTE
 def remote_check():
-    global first_remote, second_remote, third_remote, boss_health, boss1_fight, boss1_attacking_target, boss1_attacking_bullet
+    global first_remote, second_remote, third_remote, boss_health, boss1_fight, boss1_attacking_target, boss1_attacking_bullet, boss1_win, enemy_list, enemy_count
     if boss1_fight == True:
         x = player.xcor()
         y = player.ycor()
@@ -264,10 +274,16 @@ def remote_check():
             boss1_attacking_target = False
             boss1_attacking_bullet = False
             boss1_fight = False
+            boss1_win = True
+            wn.tracer(False)
+            for i in range(enemy_count):
+                enemy_list[i].goto(10**99,10**99)
+            wn.tracer(True)
             remote_1.hideturtle()
             remote_2.hideturtle()
             remote_3.hideturtle()
 
+#MAKES A ROCKET FALL ON SPECIFIED TURTLE
 def rocket_animation(turtle):
     xt = turtle.xcor()
     yt = turtle.ycor()
@@ -281,6 +297,7 @@ def rocket_animation(turtle):
     rocketman.hideturtle()
     rocketman.shape("Rocket.gif")
 
+#MAKES THE BULLET GO LEFT TO RIGHT
 def bullet_animation(turtle):
      turtle.shape("Bullets.gif")
      yt = turtle.ycor()
@@ -288,6 +305,7 @@ def bullet_animation(turtle):
      turtle.hideturtle()
      turtle.shape("Warning.gif")
 
+#CHECKS TO SEE IF PLAYER IS TOUCHING TARGETS
 def check_target(turtle):
     global player_health
     xt = turtle.xcor()
@@ -299,6 +317,7 @@ def check_target(turtle):
     if (xf >= -40) and (xf <= 40) and (yf >= -40) and (yf <= 40):
         player_health = player_health - 1
 
+#CHECKS TO SEE IF PLAYER IS TOUCHING BULLETS
 def check_bullet(turtle, hold):
     global player_health
     xt = turtle.xcor()
@@ -310,9 +329,10 @@ def check_bullet(turtle, hold):
     if(yf >= -40) and (yf <= 40) and (hold - player_health != 1):
         player_health = player_health - 1
 
+#STARTS THE FIRST BOSS
 def start_boss():
-    global boss1_fight, timer, timer_max
-    if boss1_fight == False:
+    global boss1_fight, timer, timer_max, boss1_win
+    if boss1_fight == False and boss1_win != True:
         boss1.showturtle()
         boss1.goto(560,0)
         boss1_fight = True
@@ -327,12 +347,16 @@ def start_boss():
         remote_2.goto(320,a*80)
         a = random.randint(-6,-4)
         remote_3.goto(320,a*80)
+        remote_1.shape("Remote.gif")
+        remote_2.shape("Remote.gif")
+        remote_3.shape("Remote.gif")
         remote_1.showturtle()
         remote_2.showturtle()
         remote_3.showturtle()
         player.goto(-11 * 80, 0)
         wn.tracer(True)
 
+#MAKES THE BOSS ATTACK
 def boss1_attack():
     global boss1_attacking_target, menu_status, player_health, boss1_attacking_bullet, combo
     if boss1_fight == True and player_health != 0 and combo == 0:
@@ -528,7 +552,7 @@ def check_coin():
         y = player.ycor()
         if x - xc >= -40 and x - xc <= 40 and y - yc >= -40 and y - yc <= 40:
             wn.tracer(False)
-            a = random.randint(1,30)
+            a = random.randint(1,10000)
             coins = coins + a
             display_coins()
             coin_list[i].goto(10**99,10**99)
@@ -536,36 +560,36 @@ def check_coin():
 
 #MAKES AN ENEMY AT A RANDOM SPOT, ALSO CHECKS TO MAKE SURE THEY DON'T SPAWN WITHIN 2 TILES OF THE PLAYER
 def make_enemy():
-    global enemy_count, enemy_list
+    global enemy_count, enemy_list, boss1_win, ice_world
     wn.tracer(False)
-    enemy_list.append(str(enemy_count))
-    enemy_list[enemy_count] = trtl.Turtle()
-    enemy_list[enemy_count].shape("Enemy.gif")
-    enemy_list[enemy_count].pu()
-    x = player.xcor()
-    y = player.ycor()
-    check = False
-    if boss1_fight == False:
-        xe = (random.randint(-11,11)) * 80
-        ye = (random.randint(-6,6)) * 80
-        while check == False:
-            if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
-                xe = (random.randint(-11,11)) * 80
-                ye = (random.randint(-6,6)) * 80
-            else:
-                check = True
-                
-    elif boss1_fight == True:
-        xe = (random.randint(6,11)) * 80
-        ye = (random.randint(-6,6)) * 80
-        while check == False:
-            if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
-                xe = (random.randint(6,11)) * 80
-                ye = (random.randint(-6,6)) * 80
-            else:
-                check = True
-    enemy_list[enemy_count].goto(xe, ye)
-    enemy_count = enemy_count + 1
+    if (boss1_win == False or ice_world == True):
+        enemy_list.append(str(enemy_count))
+        enemy_list[enemy_count] = trtl.Turtle()
+        enemy_list[enemy_count].shape("Enemy.gif")
+        enemy_list[enemy_count].pu()
+        x = player.xcor()
+        y = player.ycor()
+        check = False
+        if boss1_fight == False:
+            xe = (random.randint(-11,11)) * 80
+            ye = (random.randint(-6,6)) * 80
+            while check == False:
+                if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
+                    xe = (random.randint(-11,11)) * 80
+                    ye = (random.randint(-6,6)) * 80
+                else:
+                    check = True
+        elif boss1_fight == True:
+            xe = (random.randint(6,11)) * 80
+            ye = (random.randint(-6,6)) * 80
+            while check == False:
+                if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
+                    xe = (random.randint(6,11)) * 80
+                    ye = (random.randint(-6,6)) * 80
+                else:
+                    check = True
+        enemy_list[enemy_count].goto(xe, ye)
+        enemy_count = enemy_count + 1
     wn.tracer(True)
 
 #MAKES COIN AT THE SPECIFIED COORDINATE
@@ -576,8 +600,6 @@ def make_coin(turtle, xe, ye):
     coin_list[coin_count] = trtl.Turtle()
     coin_list[coin_count].shape("Coins.gif")
     coin_list[coin_count].pu()
-    x = enemy_list[turtle].xcor()
-    y = enemy_list[turtle].ycor()
     coin_list[coin_count].goto(xe, ye)
     coin_count = coin_count + 1
     wn.tracer(True)
@@ -919,15 +941,16 @@ def draw_gridy():
     
 #IF PLAYER STEPS OUT OF BOUNDS, THIS TELEPORTS THEM TO THE OTHER SIDE
 def player_bound():
-    global boss1_fight
+    global boss1_fight, ice_world
     x = player.xcor()
     y = player.ycor()
+    check_coin()
     if x > 920:
         check_coin()
         player.goto((x-80)*-1,y)
     elif x < -920:
         check_coin()
-        if boss1_fight == False:
+        if boss1_fight == False and boss1_win == False:
             player.goto((x+80)*-1,y)
         elif boss1_fight == True:
             player.goto(x + 80, y)
@@ -937,12 +960,19 @@ def player_bound():
     elif y < -520:
         check_coin()
         player.goto(x,(y+80)*-1)
-    elif y <= -120 and y >= -200 and x <= 520 and x >= 440:
+    elif y <= -120 and y >= -200 and x <= 520 and x >= 440 and boss1_win == False:
         check_coin()
         wn.tracer(False)
         player.goto(800,0)
         wn.tracer(True)
-    check_coin()
+    elif y <= -120 and y >= -200 and x <= 520 and x >= 440 and boss1_win == True:
+        check_coin()
+        wn.bgpic("Ice_Cave.gif")
+        ice_world = True
+        player.goto(0,480)
+        wn.tracer(True)
+        player.goto(0,0)
+        wn.tracer(False)
     
 #MOVES CHARACTER UP, THEN DOES ENEMY MOVEMENT
 def up():
@@ -1193,39 +1223,15 @@ def select_menu():
             menu_status = 0
             make_menu()
         elif menu_status == 1 and pointer_possition == 3 and boss1_fight == False:
-            animation = True
-            timer_max = 5
-            if timer > timer_max:
-                timer = timer - timer_max
-            animation = False
-            menu_status = 0
             start_boss()
-            make_menu()
-        elif menu_status == 1 and pointer_possition == 3 and boss1_fight == True:
-            animation = True
-            drawer.pu()
-            drawer.goto(300,300)
-            drawer.pendown()
-            drawer.pensize(15)
-            drawer.color("red")
-            drawer.goto(-300,-300)
-            drawer.pu()
-            drawer.goto(-300,300)
-            drawer.pendown()
-            drawer.goto(300,-300)
-            drawer.pensize(1)
-            drawer.color("white")
-            time.sleep(.5)
-            wn.tracer(False)
-            drawer.clear()
-            wn.tracer(True)
-            animation = False
             menu_status = 0
             make_menu()
+            make_menu()
+
 
 #RESTARTS THE GAME ONCE GAME ENDS (AFTER PRESSING R)
 def restart():
-    global coins, player_health, menu_status, spread, timer, timer_max, price, ball_distance, wait, boss1_attacking_target, boss1_attacking_bullet, boss1_fight
+    global coins, player_health, menu_status, spread, timer, timer_max, price, ball_distance, wait, boss1_attacking_target, boss1_attacking_bullet, boss1_fight, first_remote, second_remote, third_remote, boss_health
     if player_health == 0 and menu_status == 0:
         wn.tracer(False)
         for i in range(enemy_count):
@@ -1247,6 +1253,13 @@ def restart():
         boss1_attacking_target = False
         boss1_attacking_bullet = False
         boss1_fight = False
+        remote_1.hideturtle()
+        remote_2.hideturtle()
+        remote_3.hideturtle()
+        first_remote = True
+        second_remote = True
+        third_remote = True
+        boss_health = 3
         spread = False
         timer = 10
         timer_max = 10
@@ -1283,12 +1296,17 @@ wn.onkey(make_menu, 'm')
 
 wn.onkey(pointer_up, "Up")
 wn.onkey(pointer_down, "Down")
-wn.onkey(kill_everything, "g")
-wn.onkey(pickup_coins, 'p')
-wn.onkey(boss1_attack,"o")
 
 wn.onkey(select_menu, "b")
 wn.onkey(restart, 'r')
+
+#TESTING BUTTONS
+wn.onkey(kill_everything, "g")
+wn.onkey(pickup_coins, 'p')
+wn.onkey(boss1_attack,"o")
+wn.onkey(kill_boss, "u")
+
+
 
 wn.listen()
 wn.mainloop()
