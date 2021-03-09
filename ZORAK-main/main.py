@@ -24,6 +24,7 @@ wn.addshape("Rocket.gif")
 wn.addshape("Bullets.gif")
 wn.addshape("Remote.gif")
 wn.addshape("Broken_Remote.gif")
+wn.addshape("Enemy_Ice.gif")
 
 player = trtl.Turtle()
 player.pu()
@@ -37,6 +38,7 @@ ball.hideturtle()
 ball.speed(4)
 
 player_health = 3
+player_health_max = 3
 player_hp = trtl.Turtle()
 player_hp.color("red")
 player_hp.hideturtle()
@@ -184,8 +186,20 @@ boss_health = 3
 boss1_win = False
 
 ice_world = False
+
+ice_enemy_list = []
+ice_enemy_count = 0
+
+ice_enemy_health = []
+
 wn.tracer(True)
 #---------Functions---------
+#GIVES 10000 COINS
+def give_coin():
+    global coins
+    coins = coins + 10000
+    display_coins()
+
 #KILLS BOSS FOR EASY TESTING
 def kill_boss():
     global boss_health
@@ -285,6 +299,8 @@ def remote_check():
 
 #MAKES A ROCKET FALL ON SPECIFIED TURTLE
 def rocket_animation(turtle):
+    global animation
+    animation = True
     xt = turtle.xcor()
     yt = turtle.ycor()
     wn.tracer(False)
@@ -296,14 +312,18 @@ def rocket_animation(turtle):
     time.sleep(.01)
     rocketman.hideturtle()
     rocketman.shape("Rocket.gif")
+    animation = False
 
 #MAKES THE BULLET GO LEFT TO RIGHT
 def bullet_animation(turtle):
-     turtle.shape("Bullets.gif")
-     yt = turtle.ycor()
-     turtle.goto(-960,yt)
-     turtle.hideturtle()
-     turtle.shape("Warning.gif")
+    global animation
+    animation = True
+    turtle.shape("Bullets.gif")
+    yt = turtle.ycor()
+    turtle.goto(-960,yt)
+    turtle.hideturtle()
+    turtle.shape("Warning.gif")
+    animation = False
 
 #CHECKS TO SEE IF PLAYER IS TOUCHING TARGETS
 def check_target(turtle):
@@ -359,8 +379,8 @@ def start_boss():
 #MAKES THE BOSS ATTACK
 def boss1_attack():
     global boss1_attacking_target, menu_status, player_health, boss1_attacking_bullet, combo
-    if boss1_fight == True and player_health != 0 and combo == 0:
-        if boss1_attacking_target == False:
+    if boss1_fight == True and player_health != 0:
+        if boss1_attacking_target == False and combo == 0:
             a = random.randint(0,5)
             if a == 1:
                 x = player.xcor()
@@ -405,7 +425,7 @@ def boss1_attack():
             boss1_attacking_target = False
             wn.tracer(True)
             display_health()
-        if boss1_attacking_bullet == False:
+        if boss1_attacking_bullet == False and combo == 0:
             b = random.randint(0,4)
             if b == 1:
                 wn.tracer(False)
@@ -436,6 +456,8 @@ def boss1_attack():
             
 #MAKES AN EXPLOSION AT THE SPECIFIED COORDINATE
 def explosion_animation(xe, ye):
+    global animation
+    animation = True
     wn.tracer(False)
     explosion.goto(xe, ye)
     wn.tracer(True)
@@ -446,6 +468,7 @@ def explosion_animation(xe, ye):
     explosion.shape("explosion3.gif")
     explosion.hideturtle()
     explosion.shape("explosion1.gif")
+    animation = False
 
 #PICKS UP ALL COINS ON BOARD
 def pickup_coins():
@@ -465,6 +488,10 @@ def all_enemy(function):
         ye = enemy_list[i].ycor()
         if ye < 10000:
             function(enemy_list[i])
+    for i in range(ice_enemy_count):
+        ye = ice_enemy_list[i].ycor()
+        if ye < 10000:
+            function(ice_enemy_list[i])
 
 #MAKES ALL ENEMIES ATTACK
 def all_enemy_attack(function):
@@ -473,6 +500,10 @@ def all_enemy_attack(function):
         ye = enemy_list[i].ycor()
         if ye < 10000:
             function(enemy_list[i])
+    for i in range(ice_enemy_count):
+        ye = ice_enemy_list[i].ycor()
+        if ye < 10000:
+            function(ice_enemy_list[i])
     if wait > 0:
         wait = wait - 1
         if wait == 0:
@@ -483,7 +514,7 @@ def all_enemy_attack(function):
 
 #CHECKS TO SEE IF ENEMIES TAKE DAMAGE
 def all_enemy_damage(direction):
-    global attack_status, enemy_list, enemy_count, timer, wait
+    global attack_status, enemy_list, enemy_count, timer, wait, combo
     if direction == 1:
         ball_animation(90)
     elif direction == 2:
@@ -497,6 +528,10 @@ def all_enemy_damage(direction):
         ye = enemy_list[i].ycor()
         if ye < 10000:
             player_attack(direction, i)
+    for i in range(ice_enemy_count):
+        ye = ice_enemy_list[i].ycor()
+        if ye < 10000:
+            ice_player_attack(direction, i)
     a = random.randint(0,50)
     if a == 1:
         kill_everything()
@@ -511,6 +546,9 @@ def all_enemy_damage(direction):
         make_enemy()
     if wait > 0:
         wait = wait - 1
+    if wait == 0:
+        combo = 0
+        display_combo()
     wn.tracer(True)
     attack_status = 0
     player.shape("Main_Character.gif")
@@ -534,6 +572,15 @@ def kill_everything():
             make_coin(i, xe, ye)
             wn.tracer(False)
             enemy_list[i].goto(10**99,10**99)
+        for i in range(ice_enemy_count):
+            xe = ice_enemy_list[i].xcor()
+            ye = ice_enemy_list[i].ycor()
+            if ye < 10000:
+                explosion_animation(xe, ye)
+                a = a + 1
+            make_coin(i, xe, ye)
+            wn.tracer(False)
+            ice_enemy_list[i].goto(10**99,10**99)
         ogy.hideturtle()
         combo = combo + a
         wait = 1
@@ -544,7 +591,7 @@ def kill_everything():
 
 #CHECKS TO SEE IF THE PLAYER IS STEPPING ON A COIN, THEN PICKS IT UP
 def check_coin():
-    global coins
+    global coins, player_health, ice_world, boss1_win
     for i in range(coin_count):
         xc = coin_list[i].xcor()
         yc = coin_list[i].ycor()
@@ -552,25 +599,32 @@ def check_coin():
         y = player.ycor()
         if x - xc >= -40 and x - xc <= 40 and y - yc >= -40 and y - yc <= 40:
             wn.tracer(False)
-            a = random.randint(1,10000)
+            if boss1_win == False or ice_world == False:
+                a = random.randint(1,30)
+            elif ice_world == True:
+                a = random.randint(1,60)
             coins = coins + a
+            a = random.randint(1,20)
+            if player_health < player_health_max and a == 1:
+                player_health = player_health + 1
+                display_health()
             display_coins()
             coin_list[i].goto(10**99,10**99)
             wn.tracer(True)
 
 #MAKES AN ENEMY AT A RANDOM SPOT, ALSO CHECKS TO MAKE SURE THEY DON'T SPAWN WITHIN 2 TILES OF THE PLAYER
 def make_enemy():
-    global enemy_count, enemy_list, boss1_win, ice_world
+    global enemy_count, enemy_list, boss1_win, ice_world, ice_enemy_count, ice_enemy_list, ice_enemy_health
     wn.tracer(False)
     if (boss1_win == False or ice_world == True):
-        enemy_list.append(str(enemy_count))
-        enemy_list[enemy_count] = trtl.Turtle()
-        enemy_list[enemy_count].shape("Enemy.gif")
-        enemy_list[enemy_count].pu()
-        x = player.xcor()
-        y = player.ycor()
         check = False
-        if boss1_fight == False:
+        if boss1_fight == False and ice_world == False:
+            enemy_list.append(str(enemy_count))
+            enemy_list[enemy_count] = trtl.Turtle()
+            enemy_list[enemy_count].shape("Enemy.gif")
+            enemy_list[enemy_count].pu()
+            x = player.xcor()
+            y = player.ycor()
             xe = (random.randint(-11,11)) * 80
             ye = (random.randint(-6,6)) * 80
             while check == False:
@@ -579,17 +633,45 @@ def make_enemy():
                     ye = (random.randint(-6,6)) * 80
                 else:
                     check = True
-        elif boss1_fight == True:
+            enemy_list[enemy_count].goto(xe, ye)
+            enemy_count = enemy_count + 1
+        elif boss1_fight == True and ice_world == False:
+            enemy_list.append(str(enemy_count))
+            enemy_list[enemy_count] = trtl.Turtle()
+            enemy_list[enemy_count].shape("Enemy.gif")
+            enemy_list[enemy_count].pu()
             xe = (random.randint(6,11)) * 80
             ye = (random.randint(-6,6)) * 80
+            x = player.xcor()
+            y = player.ycor()
             while check == False:
                 if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
                     xe = (random.randint(6,11)) * 80
                     ye = (random.randint(-6,6)) * 80
                 else:
                     check = True
-        enemy_list[enemy_count].goto(xe, ye)
-        enemy_count = enemy_count + 1
+            enemy_list[enemy_count].goto(xe, ye)
+            enemy_count = enemy_count + 1
+            
+        if ice_world == True:
+            ice_enemy_list.append(str(ice_enemy_count))
+            ice_enemy_health.append(int(2))
+            ice_enemy_list[ice_enemy_count] = trtl.Turtle()
+            ice_enemy_list[ice_enemy_count].shape("Enemy_Ice.gif")
+            ice_enemy_list[ice_enemy_count].pu()
+            x = player.xcor()
+            y = player.ycor()
+            xe = (random.randint(-11,11)) * 80
+            ye = (random.randint(-6,6)) * 80
+            while check == False:
+                if x - xe >= -200 and x - xe <= 200 and y - ye >= -200 and y - ye <= 200:
+                    xe = (random.randint(-11,11)) * 80
+                    ye = (random.randint(-6,6)) * 80
+                else:
+                    check = True
+            ice_enemy_list[ice_enemy_count].goto(xe, ye)
+            ice_enemy_count = ice_enemy_count + 1
+                    
     wn.tracer(True)
 
 #MAKES COIN AT THE SPECIFIED COORDINATE
@@ -765,7 +847,7 @@ def player_attack(direction,enemy):
         yf = ye - y
         if spread == False:
             #UP
-            if (direction == 1) and (xf <= 40) and (xf >= -40) and (yf >= 0) and (yf <= ball_distance + 40):
+            if (direction == 1) and (xf <= 40) and (xf >= -40) and (yf >= -40) and (yf <= ball_distance + 40):
                 hurt_animation(enemy_list[enemy])
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
@@ -775,7 +857,7 @@ def player_attack(direction,enemy):
                 wait = 4
                 wn.tracer(True)
             #DOWN
-            elif (direction == 2) and (xf <= 40) and (xf >= -40) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
+            elif (direction == 2) and (xf <= 40) and (xf >= -40) and (yf <= 40) and (yf >= (-1 * ball_distance) - 40):
                 hurt_animation(enemy_list[enemy])
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
@@ -785,7 +867,7 @@ def player_attack(direction,enemy):
                 wait = 4
                 wn.tracer(True)
             #LEFT
-            elif direction == 3 and (yf <= 40) and (yf >= -40) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
+            elif direction == 3 and (yf <= 40) and (yf >= -40) and (xf <= 40) and (xf >= (-1 * ball_distance) - 40):
                 hurt_animation(enemy_list[enemy])
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
@@ -795,7 +877,7 @@ def player_attack(direction,enemy):
                 wait = 4
                 wn.tracer(True)
             #RIGHT
-            elif direction == 4 and (yf <= 40) and (yf >= -40) and (xf >= 0) and (xf <= ball_distance + 40):
+            elif direction == 4 and (yf <= 40) and (yf >= -40) and (xf >= -40) and (xf <= ball_distance + 40):
                 hurt_animation(enemy_list[enemy])
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
@@ -806,7 +888,7 @@ def player_attack(direction,enemy):
                 wn.tracer(True)
         elif spread == True:
             #UP
-            if (direction == 1) and (xf <= 120) and (xf >= -120) and (yf >= 0) and (yf <= ball_distance + 40):
+            if (direction == 1) and (xf <= 120) and (xf >= -120) and (yf >= -40) and (yf <= ball_distance + 40):
                 hurt_animation(enemy_list[enemy])
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
@@ -816,7 +898,7 @@ def player_attack(direction,enemy):
                 wait = 4
                 wn.tracer(True)
             #DOWN
-            elif (direction == 2) and (xf <= 120) and (xf >= -120) and (yf <= 0) and (yf >= (-1 * ball_distance) - 40):
+            elif (direction == 2) and (xf <= 120) and (xf >= -120) and (yf <= 40) and (yf >= (-1 * ball_distance) - 40):
                 hurt_animation(enemy_list[enemy])
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
@@ -826,7 +908,7 @@ def player_attack(direction,enemy):
                 wait = 4
                 wn.tracer(True)
             #LEFT
-            elif direction == 3 and (yf <= 120) and (yf >= -120) and (xf <= 0) and (xf >= (-1 * ball_distance) - 40):
+            elif direction == 3 and (yf <= 120) and (yf >= -120) and (xf <= 40) and (xf >= (-1 * ball_distance) - 40):
                 hurt_animation(enemy_list[enemy])
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
@@ -836,7 +918,7 @@ def player_attack(direction,enemy):
                 wait = 4
                 wn.tracer(True)
             #RIGHT
-            elif direction == 4 and (yf <= 120) and (yf >= -120) and (xf >= 0) and (xf <= ball_distance + 40):
+            elif direction == 4 and (yf <= 120) and (yf >= -120) and (xf >= -40) and (xf <= ball_distance + 40):
                 hurt_animation(enemy_list[enemy])
                 wn.tracer(False)
                 enemy_list[enemy].goto(10**99,10**99)
@@ -846,10 +928,126 @@ def player_attack(direction,enemy):
                 wait = 4
                 wn.tracer(True)
 
+def ice_player_attack(direction,enemy):
+    global attack_status, ball_distance, enemy_list, combo, wait, ice_enemy_health
+    if attack_status == 1:
+        xe = ice_enemy_list[enemy].xcor()
+        ye = ice_enemy_list[enemy].ycor()
+        x = player.xcor()
+        y = player.ycor()
+        xf = xe - x
+        yf = ye - y
+        if spread == False:
+            #UP
+            if (direction == 1) and (xf <= 40) and (xf >= -40) and (yf >= -40) and (yf <= ball_distance + 40):
+                hurt_animation(ice_enemy_list[enemy])
+                ice_enemy_health[enemy] = ice_enemy_health[enemy] - 1
+                if ice_enemy_health[enemy] <= 0:
+                    wn.tracer(False)
+                    ice_enemy_list[enemy].goto(10**99,10**99)
+                    make_coin(enemy, xe, ye)
+                    combo = combo + 1
+                    display_combo()
+                    if wait <= 4:
+                        wait = 5
+                    wn.tracer(True)
+            #DOWN
+            elif (direction == 2) and (xf <= 40) and (xf >= -40) and (yf <= 40) and (yf >= (-1 * ball_distance) - 40):
+                hurt_animation(ice_enemy_list[enemy])
+                ice_enemy_health[enemy] = ice_enemy_health[enemy] - 1
+                if ice_enemy_health[enemy] <= 0:
+                    wn.tracer(False)
+                    ice_enemy_list[enemy].goto(10**99,10**99)
+                    make_coin(enemy, xe, ye)
+                    combo = combo + 1
+                    display_combo()
+                    if wait <= 4:
+                        wait = 5
+                    wn.tracer(True)
+            #LEFT
+            elif direction == 3 and (yf <= 40) and (yf >= -40) and (xf <= 40) and (xf >= (-1 * ball_distance) - 40):
+                hurt_animation(ice_enemy_list[enemy])
+                ice_enemy_health[enemy] = ice_enemy_health[enemy] - 1
+                if ice_enemy_health[enemy] <= 0:
+                    wn.tracer(False)
+                    ice_enemy_list[enemy].goto(10**99,10**99)
+                    make_coin(enemy, xe, ye)
+                    combo = combo + 1
+                    display_combo()
+                    if wait <= 4:
+                        wait = 5
+                    wn.tracer(True)
+            #RIGHT
+            elif direction == 4 and (yf <= 40) and (yf >= -40) and (xf >= -40) and (xf <= ball_distance + 40):
+                hurt_animation(ice_enemy_list[enemy])
+                ice_enemy_health[enemy] = ice_enemy_health[enemy] - 1
+                if ice_enemy_health[enemy] <= 0:
+                    wn.tracer(False)
+                    ice_enemy_list[enemy].goto(10**99,10**99)
+                    make_coin(enemy, xe, ye)
+                    combo = combo + 1
+                    display_combo()
+                    if wait <= 4:
+                        wait = 5
+                    wn.tracer(True)
+        elif spread == True:
+            #UP
+            if (direction == 1) and (xf <= 120) and (xf >= -120) and (yf >= -40) and (yf <= ball_distance + 40):
+                hurt_animation(ice_enemy_list[enemy])
+                ice_enemy_health[enemy] = ice_enemy_health[enemy] - 1
+                if ice_enemy_health[enemy] <= 0:
+                    wn.tracer(False)
+                    ice_enemy_list[enemy].goto(10**99,10**99)
+                    make_coin(enemy, xe, ye)
+                    combo = combo + 1
+                    display_combo()
+                    if wait <= 4:
+                        wait = 5
+                    wn.tracer(True)
+            #DOWN
+            elif (direction == 2) and (xf <= 120) and (xf >= -120) and (yf <= 40) and (yf >= (-1 * ball_distance) - 40):
+                hurt_animation(ice_enemy_list[enemy])
+                ice_enemy_health[enemy] = ice_enemy_health[enemy] - 1
+                if ice_enemy_health[enemy] <= 0:
+                    wn.tracer(False)
+                    ice_enemy_list[enemy].goto(10**99,10**99)
+                    make_coin(enemy, xe, ye)
+                    combo = combo + 1
+                    display_combo()
+                    if wait <= 4:
+                        wait = 5
+                    wn.tracer(True)
+            #LEFT
+            elif direction == 3 and (yf <= 120) and (yf >= -120) and (xf <= 40) and (xf >= (-1 * ball_distance) - 40):
+                hurt_animation(ice_enemy_list[enemy])
+                ice_enemy_health[enemy] = ice_enemy_health[enemy] - 1
+                if ice_enemy_health[enemy] <= 0:
+                    wn.tracer(False)
+                    ice_enemy_list[enemy].goto(10**99,10**99)
+                    make_coin(enemy, xe, ye)
+                    combo = combo + 1
+                    display_combo()
+                    if wait <= 4:
+                        wait = 5
+                    wn.tracer(True)
+            #RIGHT
+            elif direction == 4 and (yf <= 120) and (yf >= -120) and (xf >= -40) and (xf <= ball_distance + 40):
+                hurt_animation(ice_enemy_list[enemy])
+                ice_enemy_health[enemy] = ice_enemy_health[enemy] - 1
+                if ice_enemy_health[enemy] <= 0:
+                    wn.tracer(False)
+                    ice_enemy_list[enemy].goto(10**99,10**99)
+                    make_coin(enemy, xe, ye)
+                    combo = combo + 1
+                    display_combo()
+                    if wait <= 4:
+                        wait = 5
+                    wn.tracer(True)
+
 #GETS THE CHARACTER READY TO ATTACK
 def set_attack():
-    global attack_status, menu_status, player_health
-    if player_health != 0:
+    global attack_status, menu_status, player_health, animation
+    if player_health != 0 and animation != True:
         if attack_status == 0 and menu_status == 0:
             attack_status = 1
             player.shape("Main_Character_Attack.gif")
@@ -883,15 +1081,17 @@ def set_right():
 
 #MAKES DRAWER DISPLAY HERO HEALTH, AND PAUSES FOR 1 SECOND BEFORE ENDING THE GAME IF HEALTH REACHES 0
 def display_health():
-    global player_health
+    global player_health, player_health_max
     player_hp.clear()
-    player_hp.write(str(player_health) + "/3 HP", font=("Impact", 40, "bold"))
+    player_hp.write(str(player_health) + "/" + str(player_health_max) + " HP", font=("Impact", 40, "bold"))
     if player_health == 0:
         wn.tracer(False)
         drawer.pu()
         drawer.clear()
         for i in range(enemy_count):
             enemy_list[i].goto(10**99,10**99)
+        for i in range(ice_enemy_count):
+            ice_enemy_list[i].goto(10**99,10**99)
         for i in range(coin_count):
             coin_list[i].goto(10**99,10**99)
         warning_1.hideturtle()
@@ -941,7 +1141,7 @@ def draw_gridy():
     
 #IF PLAYER STEPS OUT OF BOUNDS, THIS TELEPORTS THEM TO THE OTHER SIDE
 def player_bound():
-    global boss1_fight, ice_world
+    global boss1_fight, ice_world, boss1_win
     x = player.xcor()
     y = player.ycor()
     check_coin()
@@ -950,7 +1150,7 @@ def player_bound():
         player.goto((x-80)*-1,y)
     elif x < -920:
         check_coin()
-        if boss1_fight == False and boss1_win == False:
+        if boss1_fight == False:
             player.goto((x+80)*-1,y)
         elif boss1_fight == True:
             player.goto(x + 80, y)
@@ -965,7 +1165,7 @@ def player_bound():
         wn.tracer(False)
         player.goto(800,0)
         wn.tracer(True)
-    elif y <= -120 and y >= -200 and x <= 520 and x >= 440 and boss1_win == True:
+    elif y <= -120 and y >= -200 and x <= 520 and x >= 440 and boss1_win == True and ice_world != True:
         check_coin()
         wn.bgpic("Ice_Cave.gif")
         ice_world = True
@@ -976,9 +1176,9 @@ def player_bound():
     
 #MOVES CHARACTER UP, THEN DOES ENEMY MOVEMENT
 def up():
-    global attack_status, menu_status, timer, player_health
-    if attack_status == 0 and menu_status == 0:
-        attack_status = 4
+    global attack_status, menu_status, timer, player_health, animation
+    if attack_status == 0 and menu_status == 0 and animation != True:
+        animation = True
         wn.tracer(False)
         player.setheading(90)
         player.forward(80)
@@ -995,12 +1195,12 @@ def up():
                 timer = timer_max
                 make_enemy()
         boss1_attack()
-        attack_status = 0
+        animation = False
 #MOVES CHARACTER DOWN, THEN DOES ENEMY MOVEMENT
 def down():
-    global attack_status, menu_status, timer, player_health
-    if attack_status == 0 and menu_status == 0:
-        attack_status = 4
+    global attack_status, menu_status, timer, player_health, animation
+    if attack_status == 0 and menu_status == 0 and animation != True:
+        animation = True
         wn.tracer(False)
         player.setheading(270)
         player.forward(80)
@@ -1017,12 +1217,12 @@ def down():
                 timer = timer_max
                 make_enemy()
         boss1_attack()
-        attack_status = 0
+        animation = False
 #MOVES CHARACTER LEFT, THEN DOES ENEMY MOVEMENT
 def left():
-    global attack_status, menu_status, timer, player_health
-    if attack_status == 0 and menu_status == 0:
-        attack_status = 4
+    global attack_status, menu_status, timer, player_health, animation
+    if attack_status == 0 and menu_status == 0 and animation != True:
+        animation = True
         wn.tracer(False)
         player.setheading(180)
         player.forward(80)
@@ -1039,12 +1239,12 @@ def left():
                 timer = timer_max
                 make_enemy()
         boss1_attack()
-        attack_status = 0
+        animation = False
 #MOVES CHARACTER RIGHT, THEN DOES ENEMY MOVEMENT
 def right():
-    global attack_status, menu_status, timer, player_health
-    if attack_status == 0 and menu_status == 0:
-        attack_status = 4
+    global attack_status, menu_status, timer, player_health, animation
+    if attack_status == 0 and menu_status == 0 and animation != True:
+        animation = True
         wn.tracer(False)
         player.setheading(0)
         player.forward(80)
@@ -1061,10 +1261,10 @@ def right():
                 timer = timer_max
                 make_enemy()
         boss1_attack()
-        attack_status = 0
+        animation = False
 #MAKES MENU/SHOP
 def make_menu():
-    global menu_status, animation
+    global menu_status, animation, ice_world, price, player_health_max
     if animation == False:
         if menu_status == 0:
             wn.tracer(False)
@@ -1086,25 +1286,28 @@ def make_menu():
             drawer.goto(-400,-400)
             drawer.pensize(1)
             drawer.pu()
-            drawer.goto(-350,300)
-            drawer.write("RANGE UP: " + str(price) +  " GOLD", font=("Impact", 40, "bold"))
-            drawer.goto(-350,0)
-            drawer.write("SPREAD SHOT: 100 GOLD", font=("Impact", 40, "bold"))
-            drawer.goto(-350,-300)
-            drawer.write("START BOSS FIGHT", font=("Impact", 40, "bold"))
+            if ice_world == False:
+                drawer.goto(-350,300)
+                if price == 130:
+                    price = "MAX"
+                drawer.write("RANGE UP: " + str(price) +  " GOLD", font=("Impact", 40, "bold"))
+                drawer.goto(-350,0)
+                drawer.write("SPREAD SHOT: 100 GOLD", font=("Impact", 40, "bold"))
+                drawer.goto(-350,-300)
+                drawer.write("START BOSS FIGHT", font=("Impact", 40, "bold"))
+            if ice_world == True:
+                drawer.goto(-350,300)
+                if player_health_max == 4:
+                    drawer.write("HP UP: BOUGHT", font=("Impact", 40, "bold"))
+                else:
+                    drawer.write("HP UP: 300", font=("Impact", 40, "bold"))
+                drawer.goto(-350,0)
+                drawer.write("THE WORLDAHHHHHH: 400", font=("Impact", 40, "bold"))
+                drawer.goto(-350,-300)
+                drawer.write("START BOSS", font=("Impact", 40, "bold"))
             display_coins()
-            if spread == True:
+            if spread == True and ice_world == False:
                 drawer.goto(180,20)
-                drawer.color("green")
-                drawer.begin_fill()
-                drawer.circle(10)
-                drawer.end_fill()
-                drawer.pensize(4)
-                drawer.color("black")
-                drawer.circle(10)
-                drawer.pensize(1)
-            if boss1_fight == True:
-                drawer.goto(60,-280)
                 drawer.color("green")
                 drawer.begin_fill()
                 drawer.circle(10)
@@ -1151,9 +1354,9 @@ def pointer_down():
 
 #USES POINTER TO BUY/SELECT THINGS IN SHOP
 def select_menu():
-    global menu_status, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation, player_health, boss1_fight
+    global menu_status, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation, player_health, boss1_fight, player_health, player_health_max, ice_world, wait
     if animation == False and player_health > 0:
-        if menu_status == 1 and pointer_possition == 1 and coins >= price and price < 130:
+        if menu_status == 1 and pointer_possition == 1 and coins >= price and price < 130 and price != "MAX" and ice_world != True:
             animation = True
             wn.tracer(False)
             ball_distance = ball_distance + 160
@@ -1168,28 +1371,7 @@ def select_menu():
             animation = False
             menu_status = 0
             make_menu()
-        elif menu_status == 1 and pointer_possition == 1 and (coins < price or price >= 130):
-            animation = True
-            drawer.pu()
-            drawer.goto(300,300)
-            drawer.pendown()
-            drawer.pensize(15)
-            drawer.color("red")
-            drawer.goto(-300,-300)
-            drawer.pu()
-            drawer.goto(-300,300)
-            drawer.pendown()
-            drawer.goto(300,-300)
-            drawer.pensize(1)
-            drawer.color("white")
-            time.sleep(.5)
-            wn.tracer(False)
-            drawer.clear()
-            wn.tracer(True)
-            animation = False
-            menu_status = 0
-            make_menu()
-        elif menu_status == 1 and pointer_possition == 2 and coins >= 100 and spread == False:
+        elif menu_status == 1 and pointer_possition == 2 and coins >= 100 and spread == False and ice_world != True:
             animation = True
             wn.tracer(False)
             coins = coins - 100
@@ -1201,7 +1383,26 @@ def select_menu():
             animation = False
             menu_status = 0
             make_menu()
-        elif menu_status == 1 and pointer_possition == 2 and coins < 100 or spread == True:
+        elif menu_status == 1 and pointer_possition == 3 and boss1_fight == False and ice_world != True:
+            start_boss()
+            menu_status = 0
+            make_menu()
+            make_menu()
+        elif menu_status == 1 and pointer_possition == 1 and coins >= 300 and player_health_max != 4 and ice_world == True:
+            player_health = player_health + 1
+            player_health_max = player_health_max + 1
+            coins = coins - 300
+            display_health()
+            menu_status = 1
+            make_menu()
+            make_menu()
+        elif menu_status == 1 and pointer_possition == 2 and coins >= 400 and ice_world == True:
+            wait = 10
+            coins = coins - 400
+            menu_status = 1
+            make_menu()
+            make_menu()
+        else:
             animation = True
             drawer.pu()
             drawer.goto(300,300)
@@ -1222,29 +1423,29 @@ def select_menu():
             animation = False
             menu_status = 0
             make_menu()
-        elif menu_status == 1 and pointer_possition == 3 and boss1_fight == False:
-            start_boss()
-            menu_status = 0
-            make_menu()
-            make_menu()
-
 
 #RESTARTS THE GAME ONCE GAME ENDS (AFTER PRESSING R)
 def restart():
-    global coins, player_health, menu_status, spread, timer, timer_max, price, ball_distance, wait, boss1_attacking_target, boss1_attacking_bullet, boss1_fight, first_remote, second_remote, third_remote, boss_health
+    global coins, combo, player_health_max, boss1_win, ice_world, player_health, menu_status, spread, timer, timer_max, price, ball_distance, wait, boss1_attacking_target, boss1_attacking_bullet, boss1_fight, first_remote, second_remote, third_remote, boss_health
     if player_health == 0 and menu_status == 0:
         wn.tracer(False)
         for i in range(enemy_count):
             enemy_list[i].goto(10**99,10**99)
+        for i in range(ice_enemy_count):
+            ice_enemy_list[i].goto(10**99,10**99)
         for i in range(coin_count):
             coin_list[i].goto(10**99,10**99)
         player.goto(0,0)
+        ice_world = False
+        boss1_win = False
         make_enemy()
         make_enemy()
         coins = 0
         wait = 0
+        combo = 0
         display_coins()
         player_health = 3
+        player_health_max = 3
         price = 20
         ball_distance = 160
         ball.speed(4)
@@ -1263,6 +1464,7 @@ def restart():
         spread = False
         timer = 10
         timer_max = 10
+        wn.bgpic("background.gif")
         player.shape("Main_Character.gif")
         wn.tracer(True)
 #---------Main---------
@@ -1301,11 +1503,13 @@ wn.onkey(select_menu, "b")
 wn.onkey(restart, 'r')
 
 #TESTING BUTTONS
+#'''
 wn.onkey(kill_everything, "g")
 wn.onkey(pickup_coins, 'p')
 wn.onkey(boss1_attack,"o")
 wn.onkey(kill_boss, "u")
-
+wn.onkey(give_coin, "c")
+#'''
 
 
 wn.listen()
