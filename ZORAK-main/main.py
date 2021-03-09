@@ -86,8 +86,8 @@ coin_boy.goto(720,440)
 
 ook = 0
 
-timer = 10
-timer_max = 10
+timer = 8
+timer_max = 8
 
 ogy = trtl.Turtle()
 ogy.pu()
@@ -182,7 +182,7 @@ first_remote = True
 second_remote = True
 third_remote = True
 
-boss_health = 3
+boss_health = 2
 boss1_win = False
 
 ice_world = False
@@ -191,7 +191,10 @@ ice_enemy_list = []
 ice_enemy_count = 0
 
 ice_enemy_health = []
+time_freeze = False
 
+useless = trtl.Turtle()
+useless.speed(1)
 wn.tracer(True)
 #---------Functions---------
 #GIVES 10000 COINS
@@ -208,7 +211,7 @@ def kill_boss():
 
 #CHECKS TO SEE IF PLAYER IS STANDING ON A REMOTE
 def remote_check():
-    global first_remote, second_remote, third_remote, boss_health, boss1_fight, boss1_attacking_target, boss1_attacking_bullet, boss1_win, enemy_list, enemy_count
+    global first_remote, second_remote, third_remote, boss_health, boss1_fight, boss1_attacking_target, boss1_attacking_bullet, boss1_win, enemy_list, enemy_count, timer, timer_max
     if boss1_fight == True:
         x = player.xcor()
         y = player.ycor()
@@ -289,6 +292,8 @@ def remote_check():
             boss1_attacking_bullet = False
             boss1_fight = False
             boss1_win = True
+            timer = 7
+            timer_max = 7
             wn.tracer(False)
             for i in range(enemy_count):
                 enemy_list[i].goto(10**99,10**99)
@@ -351,13 +356,14 @@ def check_bullet(turtle, hold):
 
 #STARTS THE FIRST BOSS
 def start_boss():
-    global boss1_fight, timer, timer_max, boss1_win
+    global boss1_fight, timer, timer_max, boss1_win, animation
     if boss1_fight == False and boss1_win != True:
+        animation = True
         boss1.showturtle()
         boss1.goto(560,0)
         boss1_fight = True
-        timer = 8
-        timer_max = 8
+        timer = 6
+        timer_max = 6
         wn.tracer(False)
         for i in range(enemy_count):
             enemy_list[i].goto(10**99,10**99)
@@ -374,6 +380,7 @@ def start_boss():
         remote_2.showturtle()
         remote_3.showturtle()
         player.goto(-11 * 80, 0)
+        animation = False
         wn.tracer(True)
 
 #MAKES THE BOSS ATTACK
@@ -381,7 +388,7 @@ def boss1_attack():
     global boss1_attacking_target, menu_status, player_health, boss1_attacking_bullet, combo
     if boss1_fight == True and player_health != 0:
         if boss1_attacking_target == False and combo == 0:
-            a = random.randint(0,5)
+            a = random.randint(0,8)
             if a == 1:
                 x = player.xcor()
                 y = player.ycor()
@@ -426,12 +433,14 @@ def boss1_attack():
             wn.tracer(True)
             display_health()
         if boss1_attacking_bullet == False and combo == 0:
-            b = random.randint(0,4)
+            b = random.randint(0,3)
             if b == 1:
                 wn.tracer(False)
-                yt = random.randint(-6,6)
+                y = player.ycor()
+                y = y / 80
+                yt = random.randint((y - 4), (y + 4))
                 warning_1.goto(400,yt * 80)
-                yt = random.randint(-6,6)
+                yt = random.randint((y - 4), (y + 4))
                 warning_2.goto(400,yt * 80)
                 warning_1.showturtle()
                 warning_2.showturtle()
@@ -514,7 +523,8 @@ def all_enemy_attack(function):
 
 #CHECKS TO SEE IF ENEMIES TAKE DAMAGE
 def all_enemy_damage(direction):
-    global attack_status, enemy_list, enemy_count, timer, wait, combo
+    global attack_status, enemy_list, enemy_count, timer, wait, combo, animation, player_health
+    animation = True
     if direction == 1:
         ball_animation(90)
     elif direction == 2:
@@ -552,6 +562,9 @@ def all_enemy_damage(direction):
     wn.tracer(True)
     attack_status = 0
     player.shape("Main_Character.gif")
+    if player_health == 0:
+        player.shape("Main_Character_Dead.gif")
+    animation = False
 
 #OGY MAKES A GUEST APPEARANCE AND KILLS EVERYTHING ON THE SCREEN
 def kill_everything():
@@ -760,7 +773,7 @@ def ball_animation(heading):
 
 #FLASHES PLAYER/ENEMY FOR A HURT ANIMATION
 def hurt_animation(sprite):
-    global attack_status
+    global attack_status, player_health
     a = attack_status
     attack_status = 2
     for i in range(5):
@@ -769,6 +782,8 @@ def hurt_animation(sprite):
         sprite.showturtle()
         time.sleep(.01)
     attack_status = a
+    if player_health == 0:
+        player.shape("Main_Character_Dead.gif")
 
 #MAKES ENEMY ATTACK IF THEY ARE WITHIN A CERTAIN DISTANCE
 def enemy_attack(enemy):
@@ -1101,7 +1116,6 @@ def display_health():
         boss1_attack_left.hideturtle()
         boss1_attack_right.hideturtle()
         boss1.hideturtle()
-        player.shape("Main_Character_Dead.gif")
         drawer.goto(-170,-10)
         drawer.write("Press r to restart", font=("Impact", 40, "bold"))
         wn.tracer(True)
@@ -1176,7 +1190,7 @@ def player_bound():
     
 #MOVES CHARACTER UP, THEN DOES ENEMY MOVEMENT
 def up():
-    global attack_status, menu_status, timer, player_health, animation
+    global attack_status, menu_status, timer, player_health, animation, wait, time_freeze
     if attack_status == 0 and menu_status == 0 and animation != True:
         animation = True
         wn.tracer(False)
@@ -1194,11 +1208,14 @@ def up():
             elif timer <= 0:
                 timer = timer_max
                 make_enemy()
+        if wait == 0 and time_freeze == True:
+            wn.bgpic("Ice_Cave.gif")
+            time_freeze == False
         boss1_attack()
         animation = False
 #MOVES CHARACTER DOWN, THEN DOES ENEMY MOVEMENT
 def down():
-    global attack_status, menu_status, timer, player_health, animation
+    global attack_status, menu_status, timer, player_health, animation, wait, time_freeze
     if attack_status == 0 and menu_status == 0 and animation != True:
         animation = True
         wn.tracer(False)
@@ -1216,11 +1233,14 @@ def down():
             elif timer <= 0:
                 timer = timer_max
                 make_enemy()
+        if wait == 0 and time_freeze == True:
+            wn.bgpic("Ice_Cave.gif")
+            time_freeze == False
         boss1_attack()
         animation = False
 #MOVES CHARACTER LEFT, THEN DOES ENEMY MOVEMENT
 def left():
-    global attack_status, menu_status, timer, player_health, animation
+    global attack_status, menu_status, timer, player_health, animation, wait, time_freeze
     if attack_status == 0 and menu_status == 0 and animation != True:
         animation = True
         wn.tracer(False)
@@ -1238,11 +1258,14 @@ def left():
             elif timer <= 0:
                 timer = timer_max
                 make_enemy()
+        if wait == 0 and time_freeze == True:
+            wn.bgpic("Ice_Cave.gif")
+            time_freeze == False
         boss1_attack()
         animation = False
 #MOVES CHARACTER RIGHT, THEN DOES ENEMY MOVEMENT
 def right():
-    global attack_status, menu_status, timer, player_health, animation
+    global attack_status, menu_status, timer, player_health, animation, wait, time_freeze
     if attack_status == 0 and menu_status == 0 and animation != True:
         animation = True
         wn.tracer(False)
@@ -1260,6 +1283,12 @@ def right():
             elif timer <= 0:
                 timer = timer_max
                 make_enemy()
+        useless.goto(480, 0)
+        useless.setheading(180)
+        useless.forward(600)
+        if wait == 0 and time_freeze == True:
+            wn.bgpic("Ice_Cave.gif")
+            time_freeze == False
         boss1_attack()
         animation = False
 #MAKES MENU/SHOP
@@ -1288,7 +1317,7 @@ def make_menu():
             drawer.pu()
             if ice_world == False:
                 drawer.goto(-350,300)
-                if price == 130:
+                if price == 60:
                     price = "MAX"
                 drawer.write("RANGE UP: " + str(price) +  " GOLD", font=("Impact", 40, "bold"))
                 drawer.goto(-350,0)
@@ -1354,18 +1383,16 @@ def pointer_down():
 
 #USES POINTER TO BUY/SELECT THINGS IN SHOP
 def select_menu():
-    global menu_status, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation, player_health, boss1_fight, player_health, player_health_max, ice_world, wait
-    if animation == False and player_health > 0:
-        if menu_status == 1 and pointer_possition == 1 and coins >= price and price < 130 and price != "MAX" and ice_world != True:
+    global menu_status, time_freeze, pointer_possition, ball_distance, coins, price, spread, timer_max, timer, animation, player_health, boss1_fight, player_health, player_health_max, ice_world, wait
+    if animation == False and player_health > 0 and menu_status == 1:
+        if menu_status == 1 and pointer_possition == 1 and coins >= price and price <= 50 and price != "MAX" and ice_world != True:
             animation = True
             wn.tracer(False)
             ball_distance = ball_distance + 160
             coins = coins - price
             price = price + 10
-            if price >= 50 and price < 80:
+            if price >= 50:
                 ball.speed(6)
-            elif price >= 80:
-                ball.speed(7)
             wn.tracer(True)
             display_coins()
             animation = False
@@ -1376,9 +1403,6 @@ def select_menu():
             wn.tracer(False)
             coins = coins - 100
             spread = True
-            timer_max = 5
-            if timer > timer_max:
-                timer = timer - timer_max
             wn.tracer(True)
             animation = False
             menu_status = 0
@@ -1393,14 +1417,14 @@ def select_menu():
             player_health_max = player_health_max + 1
             coins = coins - 300
             display_health()
-            menu_status = 1
-            make_menu()
+            menu_status = 0
             make_menu()
         elif menu_status == 1 and pointer_possition == 2 and coins >= 400 and ice_world == True:
-            wait = 10
+            wait = 12
             coins = coins - 400
-            menu_status = 1
-            make_menu()
+            wn.bgpic("Ice_Cave_Colorless.gif")
+            time_freeze = True
+            menu_status = 0
             make_menu()
         else:
             animation = True
@@ -1460,10 +1484,10 @@ def restart():
         first_remote = True
         second_remote = True
         third_remote = True
-        boss_health = 3
+        boss_health = 2
         spread = False
-        timer = 10
-        timer_max = 10
+        timer = 8
+        timer_max = 8
         wn.bgpic("background.gif")
         player.shape("Main_Character.gif")
         wn.tracer(True)
@@ -1502,7 +1526,7 @@ wn.onkey(pointer_down, "Down")
 wn.onkey(select_menu, "b")
 wn.onkey(restart, 'r')
 
-#TESTING BUTTONS
+#DEV BUTTONS
 #'''
 wn.onkey(kill_everything, "g")
 wn.onkey(pickup_coins, 'p')
